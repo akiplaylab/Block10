@@ -1,4 +1,5 @@
 import type { Round } from './game';
+import type { MakeTenRound } from './make-ten';
 
 type Completion = {
   problemIndex: number;
@@ -39,6 +40,26 @@ export function saveCompletion(round: Round) {
       elapsedMs: Math.round(performance.now() - round.startedAt),
     });
     localStorage.setItem(historyKey, JSON.stringify(history));
+  } catch {
+    return;
+  }
+}
+
+export function saveMakeTenCompletion(round: MakeTenRound) {
+  const key = 'block10.makeTen.history';
+  try {
+    const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+    const history = Array.isArray(saved) ? saved : [];
+    history.push({
+      first: round.first,
+      choices: round.choices,
+      attempts: round.attempts,
+      attemptCount: round.attempts.length,
+      hintCount: round.hintCount,
+      elapsedMs: Math.round(performance.now() - round.startedAt),
+      completedAt: new Date().toISOString(),
+    });
+    localStorage.setItem(key, JSON.stringify(history));
   } catch {
     return;
   }

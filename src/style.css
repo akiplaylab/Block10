@@ -408,3 +408,104 @@ main { position: relative; height: 100%; }
   .game-screen { row-gap: 4px; padding-bottom: 4px; }
   .turn { --piece: min(8vw, 9vh, 36px); }
 }
+
+.score {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  min-height: var(--control);
+  padding: 0 .85em;
+  border: 2px solid white;
+  border-radius: 100px;
+  color: #4f3d93;
+  background: #f9f3ff;
+  box-shadow: 0 4px 0 #558cc344;
+  font-size: clamp(16px, 2.8vw, 25px);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.make-ten {
+  --choice-piece: clamp(13px, min(4.2vw, 5.6vh), 43px);
+  --choice-gap: clamp(2px, .55vw, 6px);
+  --choice-pad: clamp(6px, 1.4vw, 15px);
+  --choice-height: calc(3 * var(--choice-piece) + 2 * var(--choice-gap) + 2 * var(--choice-pad) + 4px);
+  --feedback-height: clamp(26px, 5vh, 38px);
+  grid-template-rows: auto auto var(--feedback-height) var(--choice-height) var(--control);
+  row-gap: clamp(6px, 2vh, 17px);
+}
+
+.make-ten #bottom-row { display: none; }
+.make-ten #answer { color: #4f3d93; background: #f1eaff; }
+.make-ten #second { min-width: 1em; text-align: center; }
+.make-ten #second.solved { color: #b45105; }
+.make-ten .turn { height: 100%; }
+.make-ten .supply {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(5px, 1.5vw, 17px);
+  width: min(91vw, 690px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.make-ten .supply .choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, 1vw, 13px);
+  width: auto;
+  height: var(--choice-height);
+  padding: var(--choice-pad);
+  border: 2px solid white;
+  border-radius: clamp(12px, 2.5vw, 25px);
+  color: #9c4709;
+  background: linear-gradient(#fffaf0, #ffedcb);
+  box-shadow: 0 4px 0 #d68e4d59, 0 8px 16px #a3846e29;
+}
+
+.choice-number {
+  min-width: .63em;
+  font: 900 clamp(18px, min(5vw, 7vh), 46px) / 1 ui-rounded, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.choice-pieces {
+  display: grid;
+  grid-template-columns: repeat(3, var(--choice-piece));
+  grid-template-rows: repeat(3, var(--choice-piece));
+  gap: var(--choice-gap);
+}
+
+.choice.chosen .choice-pieces { opacity: 0; }
+.choice[aria-disabled="true"], .make-ten #hint[aria-disabled="true"] { cursor: default; }
+.make-ten .cell.trial { opacity: .76; }
+
+.feedback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1.6vw, 16px);
+  color: #72482f;
+  font-size: clamp(14px, min(4vw, 4vh), 22px);
+}
+.feedback p { margin: 0; white-space: nowrap; }
+.overflow { display: flex; gap: 2px; }
+.overflow .block { width: min(3.5vw, 3.6vh, 21px); aspect-ratio: 1; }
+
+@media (max-width: 520px) and (orientation: portrait) {
+  .make-ten { --choice-piece: clamp(12px, 4vw, 20px); }
+}
+
+@media (max-height: 420px) and (orientation: landscape) {
+  .make-ten { --choice-piece: clamp(12px, 4.4vh, 30px); --choice-pad: 5px; row-gap: 5px; }
+  .make-ten .equation { padding-top: .02em; padding-bottom: .06em; }
+}
+
+@media (max-height: 315px) and (orientation: landscape) {
+  .make-ten { --choice-gap: 2px; --feedback-height: 20px; row-gap: 3px; }
+}
