@@ -4,6 +4,8 @@
 
 [ブロック 10 であそぶ](https://akiplaylab.github.io/Block10/)
 
+LINE や SNS でゲームの URL を共有すると、共有プレビューには専用の横長 OGP 画像を使用します。
+
 ## 開発環境で起動
 
 Node.js 22 LTS（22.12 以上）と npm を使用します。
