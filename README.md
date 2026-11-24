@@ -34,6 +34,24 @@ npm run preview
 2. 共有メニューから「ホーム画面に追加」を選びます。
 3. 名前が「ブロック 10」であることを確認し、「追加」をタップします。
 
+## Windows のデスクトップに追加
+
+Microsoft Edge でゲームを開き、メニューの「アプリ」から「このサイトをアプリとしてインストール」を選びます。インストール後、`edge://apps` で「ブロック 10」の詳細を開き、「デスクトップ ショートカットの作成」を選びます。[Microsoft Edge のアプリの手順](https://support.microsoft.com/en-us/edge/install-manage-or-uninstall-apps-in-microsoft-edge)
+
+Edge のアプリインストール機能が使えない場合は、Windows でショートカットを作成できます。
+
+1. デスクトップの空いている場所を右クリックし、「新規作成」から「ショートカット」を選びます。
+2. 「項目の場所」に以下を入力し、「次へ」をクリックします。
+
+   ```text
+   "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --app=https://akiplaylab.github.io/Block10/
+   ```
+
+   Edge が別の場所にインストールされている場合は、引用符内を実際の `msedge.exe` のパスに変更します。
+3. 名前に「ブロック 10」と入力し、「完了」をクリックします。
+4. [Block10.ico](https://akiplaylab.github.io/Block10/Block10.ico) をダウンロードし、移動や削除をせずに保管できるフォルダーへ保存します。
+5. ショートカットを右クリックして「プロパティ」を開き、「ショートカット」タブの「アイコンの変更」をクリックします。「参照」から保存した `Block10.ico` を選び、「OK」「適用」の順にクリックします。
+
 ## 保存データ
 
 サウンド設定と学習履歴は端末上の LocalStorage に保存します。履歴には完了した問題、完了日時、ヒントの使用回数、開始から完了までの経過時間が含まれます。これらのデータはサーバーに送信されません。
