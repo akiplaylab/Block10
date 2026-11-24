@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite';
+import { pagesOffline } from './build/pages-offline';
 
 const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? 'block10';
-const pagesBase = `/${repositoryName}/`;
+const pagesBase = `/${repositoryName.toLowerCase()}/`;
 
 export default defineConfig(({ mode }) => ({
   base: mode === 'pages-test' ? `${pagesBase}test/` : mode === 'production' ? pagesBase : '/',
   build: { target: 'safari15' },
-  plugins: mode === 'pages-test' ? [{
+  plugins: [pagesOffline(mode === 'pages-test'), ...(mode === 'pages-test' ? [{
     name: 'pages-test-banner',
     transformIndexHtml() {
       const pr = process.env.VITE_TEST_PR ?? '';
@@ -20,10 +21,10 @@ export default defineConfig(({ mode }) => ({
         {
           tag: 'aside',
           attrs: { class: 'test-banner' },
-          children: `TEST · ${revision}`,
+          children: `TEST · ${revision}<span id="offline-test" hidden> · オフライン保存版</span>`,
           injectTo: 'body-prepend',
         },
       ];
     },
-  }] : [],
+  } as const] : [])],
 }));

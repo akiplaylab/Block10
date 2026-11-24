@@ -3,6 +3,7 @@ import { enableSound, playSound } from './audio';
 import { burst, fly, pause } from './effects';
 import { rowSize } from './game';
 import { createQuestionSource, type MakeTenRound } from './make-ten';
+import { initializeOffline } from './offline';
 import { readSound, saveMakeTenCompletion, saveSound } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
@@ -10,6 +11,7 @@ function element<T extends HTMLElement = HTMLElement>(id: string) {
 }
 
 const title = element('title');
+const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const play = element<HTMLButtonElement>('play');
 const home = element<HTMLButtonElement>('home');
@@ -211,6 +213,7 @@ home.addEventListener('click', () => {
   score.hidden = true;
   title.hidden = false;
   play.focus({ preventScroll: true });
+  applyOfflineUpdate?.();
 });
 
 sound.addEventListener('click', () => {
