@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite';
 
+const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? 'block10';
+const pagesBase = `/${repositoryName}/`;
+
 export default defineConfig(({ mode }) => ({
-  base: mode === 'pages-test' ? '/Block10/test/' : mode === 'production' ? '/Block10/' : '/',
+  base: mode === 'pages-test' ? `${pagesBase}test/` : mode === 'production' ? pagesBase : '/',
   build: { target: 'safari15' },
   plugins: mode === 'pages-test' ? [{
     name: 'pages-test-banner',

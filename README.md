@@ -2,8 +2,8 @@
 
 「あそぶ」を押すと「10 をつくる」が始まります。盤面の青いブロックに足すオレンジのブロックを、3 つの選択肢から 1 つ選びます。ぴったり 10 個になると虹色のブロックを 1 個獲得します。多すぎたり少なすぎたりしても、同じ問題に何度でも挑戦できます。ヒントを押すと、盤面の空いているマスが光ります。
 
-- [本番環境であそぶ](https://akiplaylab.github.io/Block10/)
-- [テスト環境であそぶ](https://akiplaylab.github.io/Block10/test/)
+- [本番環境であそぶ](https://akiplaylab.github.io/block10/)
+- [テスト環境であそぶ](https://akiplaylab.github.io/block10/test/)
 
 LINE や SNS でゲームの URL を共有すると、共有プレビューには専用の横長 OGP 画像を使用します。
 
@@ -25,9 +25,9 @@ npm run build
 npm run preview
 ```
 
-ビルドは TypeScript の型チェックを実行し、静的ファイルを `dist/` に出力します。ビルド結果は、プレビューサーバーが表示する `/Block10/` の URL で確認できます。
+ビルドは TypeScript の型チェックを実行し、静的ファイルを `dist/` に出力します。ビルド結果は、プレビューサーバーが表示する `/block10/` の URL で確認できます。
 
-テスト環境用にビルドする場合は `npm run build:test` を実行し、`npm run preview -- --mode pages-test` で `/Block10/test/` を開きます。
+テスト環境用にビルドする場合は `npm run build:test` を実行し、`npm run preview -- --mode pages-test` で `/block10/test/` を開きます。
 
 ## 公開と受け入れテスト
 
@@ -41,7 +41,7 @@ GitHub Actions は `main` のビルドをサイトのルートに、選択した
 
 ## iPad・iPhone のホーム画面に追加
 
-1. Safari で[ゲームの公開ページ](https://akiplaylab.github.io/Block10/)を開きます。
+1. Safari で[ゲームの公開ページ](https://akiplaylab.github.io/block10/)を開きます。
 2. 共有メニューから「ホーム画面に追加」を選びます。
 3. 名前が「ブロック 10」であることを確認し、「追加」をタップします。
 
@@ -55,12 +55,12 @@ Edge のアプリインストール機能が使えない場合は、Windows で�
 2. 「項目の場所」に以下を入力し、「次へ」をクリックします。
 
    ```text
-   "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --app=https://akiplaylab.github.io/Block10/
+   "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --app=https://akiplaylab.github.io/block10/
    ```
 
    Edge が別の場所にインストールされている場合は、引用符内を実際の `msedge.exe` のパスに変更します。
 3. 名前に「ブロック 10」と入力し、「完了」をクリックします。
-4. [Block10.ico](https://akiplaylab.github.io/Block10/Block10.ico) をダウンロードし、移動や削除をせずに保管できるフォルダーへ保存します。
+4. [Block10.ico](https://akiplaylab.github.io/block10/Block10.ico) をダウンロードし、移動や削除をせずに保管できるフォルダーへ保存します。
 5. ショートカットを右クリックして「プロパティ」を開き、「ショートカット」タブの「アイコンの変更」をクリックします。「参照」から保存した `Block10.ico` を選び、「OK」「適用」の順にクリックします。
 
 ## 保存データ
