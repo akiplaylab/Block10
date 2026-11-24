@@ -32,6 +32,7 @@
     </div>
     <header>
       <button id="home" class="utility" type="button" hidden><span aria-hidden="true">⌂</span> ホーム</button>
+      <div id="score" class="score" aria-live="polite" hidden></div>
       <button id="sound" class="utility sound" type="button" aria-label="おと" aria-pressed="true">
         <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">ON</span>
       </button>
@@ -53,6 +54,10 @@
         <div class="board" role="img" aria-label="ブロックの盤面">
           <div id="top-row" class="row" aria-hidden="true"></div>
           <div id="bottom-row" class="row reserved" aria-hidden="true"></div>
+        </div>
+        <div class="feedback">
+          <p id="feedback" role="status"></p>
+          <div id="overflow" class="overflow" aria-hidden="true"></div>
         </div>
         <div class="turn">
           <div id="supply" class="supply" aria-label="おくブロック"></div>
