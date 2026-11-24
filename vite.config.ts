@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite';
 import { pagesOffline } from './build/pages-offline';
 
+const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? 'block10';
+const pagesBase = `/${repositoryName.toLowerCase()}/`;
+
 export default defineConfig(({ mode }) => ({
-  base: mode === 'pages-test' ? '/Block10/test/' : mode === 'production' ? '/Block10/' : '/',
+  base: mode === 'pages-test' ? `${pagesBase}test/` : mode === 'production' ? pagesBase : '/',
   build: { target: 'safari15' },
   plugins: [pagesOffline(mode === 'pages-test'), ...(mode === 'pages-test' ? [{
     name: 'pages-test-banner',
