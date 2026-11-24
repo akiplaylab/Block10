@@ -431,7 +431,8 @@ main { position: relative; height: 100%; }
   --choice-piece: clamp(13px, min(4.2vw, 5.6vh), 43px);
   --choice-gap: clamp(2px, .55vw, 6px);
   --choice-pad: clamp(6px, 1.4vw, 15px);
-  --choice-height: calc(3 * var(--choice-piece) + 2 * var(--choice-gap) + 2 * var(--choice-pad) + 4px);
+  --choice-number-size: clamp(36px, min(10vw, 14vh), 92px);
+  --choice-height: calc(var(--choice-number-size) + 3 * var(--choice-piece) + 3 * var(--choice-gap) + 2 * var(--choice-pad) + 4px);
   --feedback-height: clamp(26px, 5vh, 38px);
   grid-template-rows: auto auto var(--feedback-height) var(--choice-height) var(--control);
   row-gap: clamp(6px, 2vh, 17px);
@@ -454,10 +455,10 @@ main { position: relative; height: 100%; }
 }
 
 .make-ten .supply .choice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(3px, 1vw, 13px);
+  display: grid;
+  grid-template-rows: var(--choice-number-size) auto;
+  justify-items: center;
+  gap: var(--choice-gap);
   width: auto;
   height: var(--choice-height);
   padding: var(--choice-pad);
@@ -469,8 +470,7 @@ main { position: relative; height: 100%; }
 }
 
 .choice-number {
-  min-width: .63em;
-  font: 900 clamp(18px, min(5vw, 7vh), 46px) / 1 ui-rounded, system-ui, sans-serif;
+  font: 900 var(--choice-number-size) / 1 ui-rounded, system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
@@ -502,12 +502,24 @@ main { position: relative; height: 100%; }
 }
 
 @media (max-height: 420px) and (orientation: landscape) {
-  .make-ten { --choice-piece: clamp(12px, 4.4vh, 30px); --choice-pad: 5px; row-gap: 5px; }
+  .make-ten {
+    --choice-piece: clamp(12px, 4.4vh, 30px);
+    --choice-number-size: clamp(28px, 11vh, 46px);
+    --choice-pad: 5px;
+    row-gap: 5px;
+  }
   .make-ten .equation { padding-top: .02em; padding-bottom: .06em; }
 }
 
-@media (max-height: 315px) and (orientation: landscape) {
-  .make-ten { --choice-gap: 2px; --feedback-height: 20px; row-gap: 3px; }
+@media (max-height: 350px) and (orientation: landscape) {
+  .make-ten {
+    --choice-piece: clamp(10px, 4vh, 14px);
+    --choice-gap: 2px;
+    --choice-pad: 4px;
+    --choice-number-size: 28px;
+    --feedback-height: 20px;
+    row-gap: 3px;
+  }
 }
 .test-banner {
   position: fixed;
