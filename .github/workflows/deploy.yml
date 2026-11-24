@@ -89,7 +89,7 @@ jobs:
           VITE_TEST_PR: ${{ needs.select.outputs.pr }}
           VITE_TEST_SHA: ${{ needs.select.outputs.sha }}
         run: |
-          npm run build:test
+          npm run build:test -- --base "/${GITHUB_REPOSITORY#*/}/test/"
           grep -Fq 'name="robots" content="noindex"' dist/index.html
           grep -Fq "TEST · PR #$VITE_TEST_PR · ${VITE_TEST_SHA:0:7}" dist/index.html
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
