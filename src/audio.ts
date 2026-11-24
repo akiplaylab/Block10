@@ -1,0 +1,54 @@
+const notes = {
+  place: [523.25, 659.25],
+  ten: [523.25, 659.25, 783.99, 1046.5],
+  success: [659.25, 783.99, 1046.5, 1318.51],
+};
+
+let context: AudioContext | undefined;
+let volume: GainNode | undefined;
+
+export function enableSound(enabled: boolean) {
+  if (!enabled) {
+    if (volume) volume.gain.value = 0;
+    return;
+  }
+
+  try {
+    if (!context) {
+      const SafariAudioContext = (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const Audio = window.AudioContext ?? SafariAudioContext;
+      if (!Audio) return;
+      context = new Audio();
+      volume = context.createGain();
+      volume.connect(context.destination);
+    }
+    if (volume) volume.gain.value = 0.24;
+    if (context.state !== 'running') void context.resume().catch(() => {});
+  } catch {
+    return;
+  }
+}
+
+export function playSound(name: keyof typeof notes) {
+  if (!context || !volume || context.state !== 'running' || volume.gain.value === 0) return;
+
+  const audio = context;
+  const output = volume;
+  notes[name].forEach((frequency, index) => {
+    const start = audio.currentTime + index * (name === 'place' ? 0.032 : 0.06);
+    const tone = audio.createOscillator();
+    const envelope = audio.createGain();
+    tone.frequency.value = frequency;
+    envelope.gain.setValueAtTime(0.001, start);
+    envelope.gain.exponentialRampToValueAtTime(0.45, start + 0.012);
+    envelope.gain.exponentialRampToValueAtTime(0.001, start + 0.14);
+    tone.connect(envelope);
+    envelope.connect(output);
+    tone.start(start);
+    tone.stop(start + 0.15);
+    tone.onended = () => {
+      tone.disconnect();
+      envelope.disconnect();
+    };
+  });
+}
