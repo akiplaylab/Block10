@@ -509,3 +509,15 @@ main { position: relative; height: 100%; }
 @media (max-height: 315px) and (orientation: landscape) {
   .make-ten { --choice-gap: 2px; --feedback-height: 20px; row-gap: 3px; }
 }
+.test-banner {
+  position: fixed;
+  z-index: 10;
+  inset-inline-end: 0.5rem;
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.35rem;
+  background: #fff;
+  color: #334155;
+  font: 600 0.7rem / 1.4 system-ui, sans-serif;
+  pointer-events: none;
+}

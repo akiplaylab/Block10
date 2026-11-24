@@ -3,39 +3,157 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: [Request Pages preview]
+    types: [completed]
   workflow_dispatch:
+    inputs:
+      pr:
+        description: 'テスト対象の PR 番号（空欄で自動選択）'
+        type: string
 
 permissions: {}
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: github-pages
   cancel-in-progress: false
 
 jobs:
-  build:
-    if: github.ref == 'refs/heads/main'
+  select:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+        (github.event.workflow_run.event == 'pull_request' &&
+         github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
     permissions:
+      pull-requests: read
+    outputs:
+      pr: ${{ steps.preview.outputs.pr }}
+      sha: ${{ steps.preview.outputs.sha }}
+    steps:
+      - id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_PR: ${{ inputs.pr }}
+        run: |
+          if [[ -n "$REQUESTED_PR" ]]; then
+            if [[ ! "$REQUESTED_PR" =~ ^[1-9][0-9]*$ ]]; then
+              echo "::error::Enter a valid PR number."
+              exit 1
+            fi
+            response=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$REQUESTED_PR")
+            candidates=$(jq -c '[.]' <<< "$response")
+          else
+            candidates=$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/pulls?state=open&base=main&sort=updated&direction=desc&per_page=100" | jq -c 'add')
+          fi
+
+          selected=$(jq -r --arg repo "$GITHUB_REPOSITORY" '
+            map(select(.state == "open" and .base.ref == "main" and .head.repo.full_name == $repo))
+            | first // empty | [.number, .head.sha] | @tsv
+          ' <<< "$candidates")
+          if [[ -n "$selected" ]]; then
+            read -r pr sha <<< "$selected"
+            echo "pr=$pr" >> "$GITHUB_OUTPUT"
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+            echo "TEST: PR #$pr at $sha" >> "$GITHUB_STEP_SUMMARY"
+          elif [[ -n "$REQUESTED_PR" ]]; then
+            echo "::error::Choose an open PR from this repository targeting main."
+            exit 1
+          fi
+
+  preview:
+    needs: select
+    if: needs.select.outputs.pr != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
       contents: read
-      pages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ needs.select.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: '22'
-          cache: npm
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run test --if-present
+      - env:
+          VITE_TEST_PR: ${{ needs.select.outputs.pr }}
+          VITE_TEST_SHA: ${{ needs.select.outputs.sha }}
+        run: |
+          npm run build:test
+          grep -Fq 'name="robots" content="noindex"' dist/index.html
+          grep -Fq "TEST · PR #$VITE_TEST_PR · ${VITE_TEST_SHA:0:7}" dist/index.html
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: preview
+          path: dist
+          if-no-files-found: error
+          overwrite: true
+
+  package:
+    needs: [select, preview]
+    if: ${{ !cancelled() && needs.select.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: refs/heads/main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+          package-manager-cache: false
       - run: npm ci
       - run: npm run test --if-present
       - run: npm run build
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
+      - id: download-preview
+        if: needs.preview.result == 'success'
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: preview
+          path: ${{ runner.temp }}/pages-preview
+      - if: steps.download-preview.outcome == 'success'
+        run: mv -- "$RUNNER_TEMP/pages-preview" dist/test
+      - if: steps.download-preview.outcome != 'success'
+        env:
+          PR: ${{ needs.select.outputs.pr }}
+          SHA: ${{ needs.select.outputs.sha }}
+        run: |
+          if [[ -n "$PR" ]]; then
+            status="PR #$PR · ${SHA:0:7} のテスト版を公開できませんでした。Actions の実行結果を確認してください。"
+          else
+            status="テスト対象の Pull Request はありません。"
+          fi
+          mkdir -p dist/test
+          cat > dist/test/index.html <<HTML
+          <!doctype html>
+          <html lang="ja">
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="robots" content="noindex">
+            <title>TEST · ブロック 10</title>
+            <main><h1>TEST</h1><p>$status</p></main>
+          </html>
+          HTML
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: dist
 
   deploy:
-    needs: build
+    needs: package
+    if: ${{ !cancelled() && needs.package.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

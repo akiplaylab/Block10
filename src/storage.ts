@@ -9,8 +9,9 @@ type Completion = {
   elapsedMs: number;
 };
 
-const soundKey = 'block10.sound';
-const historyKey = 'block10.history';
+const storagePrefix = import.meta.env.MODE === 'pages-test' ? 'block10.test' : 'block10';
+const soundKey = `${storagePrefix}.sound`;
+const historyKey = `${storagePrefix}.history`;
 
 export function readSound() {
   try {
@@ -46,7 +47,7 @@ export function saveCompletion(round: Round) {
 }
 
 export function saveMakeTenCompletion(round: MakeTenRound) {
-  const key = 'block10.makeTen.history';
+  const key = `${storagePrefix}.makeTen.history`;
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
     const history = Array.isArray(saved) ? saved : [];
