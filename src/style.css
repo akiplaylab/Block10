@@ -733,21 +733,27 @@ body:has(#settings[open]) { touch-action: pan-y; }
 }
 
 .complement[data-method="input"] .supply { display: block; width: min(94vw, 260px); }
-.answer-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.answer-form {
+  --key-height: 44px;
+  --display-font-size: 26px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
 .answer-form output {
   display: grid;
   place-items: center;
   grid-column: 1 / -1;
-  min-height: 44px;
+  min-height: var(--key-height);
   border: 2px solid #9ab4d7;
   border-radius: 12px;
   background: #f5fbff;
   color: #213762;
-  font: 900 26px / 1 system-ui, sans-serif;
+  font: 900 var(--display-font-size) / 1 system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
-.answer-form button { width: auto; height: 44px; min-height: 44px; padding: 0; border-radius: 12px; }
+.answer-form button { width: auto; height: var(--key-height); min-height: var(--key-height); padding: 0; border-radius: 12px; }
 .answer-form button[type="submit"] { background: #e1d8ff; color: #4f3d93; }
 .answer-form.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
@@ -760,7 +766,20 @@ body:has(#settings[open]) { touch-action: pan-y; }
 }
 #supply .number-in-flight { color: transparent; }
 
-@media (orientation: landscape) and (max-height: 420px) {
+@media (min-width: 700px) and (min-height: 550px) {
+  .complement[data-method="input"] .supply {
+    width: min(52vw, calc(60 * var(--viewport-unit, 1vh)), 500px);
+  }
+  .answer-form {
+    --key-height: clamp(44px, calc(12 * var(--viewport-unit, 1vh) - 18px), 84px);
+    --key-font-size: min(5vw, calc(5 * var(--viewport-unit, 1vh)), 46px);
+    --display-font-size: calc(1.15 * var(--key-font-size));
+    gap: clamp(5px, 1vh, 10px);
+  }
+  .answer-form button { font-size: var(--key-font-size); }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
   .complement[data-method="input"] {
     grid-template-areas: "equation turn" "feedback turn" "actions turn";
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
