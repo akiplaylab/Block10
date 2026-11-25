@@ -119,35 +119,26 @@ function makeAnswerForm(current: ComplementRound) {
 
   const maxDigits = String(current.total - 1).length;
   let value = '';
-  let replaceOnDigit = false;
 
-  function clear() {
-    if (phase !== 'choosing') return;
-    clearTrial?.();
+  function resetValue() {
     value = '';
     display.textContent = '?';
-    replaceOnDigit = false;
   }
 
   function addDigit(digit: string) {
     if (phase !== 'choosing') return;
-    if (replaceOnDigit) clear();
     if (value.length >= maxDigits) return;
+    if (!value) clearTrial?.();
     value += digit;
     display.textContent = value;
   }
 
-  for (const digit of '123456789C0') {
+  for (const digit of '1234567890') {
     const key = document.createElement('button');
     key.type = 'button';
     key.className = 'utility';
     key.textContent = digit;
-    if (digit === 'C') {
-      key.setAttribute('aria-label', 'C すべてけす');
-      key.addEventListener('click', clear);
-    } else {
-      key.addEventListener('click', () => addDigit(digit));
-    }
+    key.addEventListener('click', () => addDigit(digit));
     form.append(key);
   }
 
@@ -159,14 +150,18 @@ function makeAnswerForm(current: ComplementRound) {
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (!value) return;
-    if (await choose(current, Number(value), form) === false) replaceOnDigit = true;
+    if (await choose(current, Number(value), form) === false) resetValue();
   });
   form.addEventListener('keydown', event => {
     if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
     const key = event.key;
     if (/^[0-9]$/.test(key)) addDigit(key);
-    else if (key === 'c' || key === 'C' || key === 'Delete') clear();
-    else if (key === 'Enter') form.requestSubmit();
+    else if (key === 'c' || key === 'C' || key === 'Delete') {
+      if (phase === 'choosing') {
+        clearTrial?.();
+        resetValue();
+      }
+    } else if (key === 'Enter') form.requestSubmit();
     else return;
     event.preventDefault();
   });

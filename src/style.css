@@ -754,7 +754,7 @@ body:has(#settings[open]) { touch-action: pan-y; }
 }
 
 .answer-form button { width: auto; height: var(--key-height); min-height: var(--key-height); padding: 0; border-radius: 12px; }
-.answer-form button[type="submit"] { background: #e1d8ff; color: #4f3d93; }
+.answer-form button[type="submit"] { grid-column: span 2; background: #e1d8ff; color: #4f3d93; }
 .answer-form.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
 .complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
