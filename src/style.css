@@ -23,6 +23,16 @@ html, body {
 }
 
 body {
+  --sky-glow: #edfbff;
+  --sky-middle: #c8efff;
+  --sky-top: #6ac8ff;
+  --sky-horizon: #98ddff;
+  --sky-low: #e6e8ff;
+  --sky-bottom: #ffe7f8;
+  --operation-ink: #234c94;
+  --operation-surface: #f5fbff;
+  --operation-tint: #deedff;
+  --operation-shadow: #558cc366;
   position: fixed;
   inset: 0;
   height: 100%;
@@ -31,8 +41,21 @@ body {
   -webkit-user-select: none;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
-  background: radial-gradient(ellipse at 50% 49%, #edfbff 0%, #c8efff 42%, transparent 73%),
-    linear-gradient(180deg, #6ac8ff 0%, #98ddff 47%, #e6e8ff 82%, #ffe7f8 100%);
+  background: radial-gradient(ellipse at 50% 49%, var(--sky-glow) 0%, var(--sky-middle) 42%, transparent 73%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-horizon) 47%, var(--sky-low) 82%, var(--sky-bottom) 100%);
+}
+
+body[data-operation="subtraction"] {
+  --sky-glow: #fcf0ff;
+  --sky-middle: #e7ccff;
+  --sky-top: #9e75e8;
+  --sky-horizon: #c19bf1;
+  --sky-low: #ecd4ff;
+  --sky-bottom: #ffe0ee;
+  --operation-ink: #59348f;
+  --operation-surface: #fcf7ff;
+  --operation-tint: #eadcff;
+  --operation-shadow: #7952ad66;
 }
 
 button {
@@ -406,7 +429,7 @@ main { position: relative; height: 100%; }
   :root { --viewport-unit: 1dvh; }
 }
 
-.modes, .ten-preview, .complement {
+.modes, .complement {
   --choice-piece: clamp(11px, min(3.8vw, calc(4.4 * var(--viewport-unit, 1vh))), 34px);
   --choice-gap: clamp(2px, .5vw, 5px);
   --choice-pad: clamp(5px, 1vw, 12px);
@@ -446,29 +469,39 @@ main { position: relative; height: 100%; }
   opacity: 0;
 }
 
-.operations span {
-  display: grid;
-  place-items: center;
-  min-height: 36px;
+.operation-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .32em;
+  min-height: 44px;
   padding: 0 .85em;
   border: 2px solid white;
   border-radius: 999px;
-  background: #f5fbff;
-  color: #234c94;
+  background: var(--operation-surface);
+  color: var(--operation-ink);
+  box-shadow: 0 3px 0 var(--operation-shadow);
   font-size: clamp(14px, 3vw, 19px);
 }
 
-.operations input:checked + span { background: #234c94; color: white; }
-.operations input:focus-visible + span { outline: 3px solid #234c94; outline-offset: 2px; }
+.operation-option b { font: 900 1.75em / 1 system-ui, sans-serif; }
+.operations input:checked + span {
+  background: var(--operation-ink);
+  color: white;
+  box-shadow: 0 0 0 2px var(--operation-ink), 0 4px 0 var(--operation-shadow);
+}
+.operations input:focus-visible + span { outline: 3px solid var(--operation-ink); outline-offset: 4px; }
 #answer-count { display: block; font-size: .6em; }
 
 .ten-preview {
-  --choice-piece: clamp(13px, min(5vw, 3.6vh), 30px);
-  --choice-number-size: clamp(38px, min(16vw, 8vh), 82px);
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 2.5vw, 24px);
-  color: #234c94;
+  padding: .06em .45em;
+  border: 2px solid white;
+  border-radius: 999px;
+  color: var(--operation-ink);
+  background: var(--operation-surface);
+  box-shadow: 0 4px 0 var(--operation-shadow);
+  font: 950 clamp(28px, min(10vw, 6.8vh), 64px) / 1.1 system-ui, sans-serif;
+  white-space: nowrap;
 }
 
 #play-ten {
@@ -508,9 +541,9 @@ main { position: relative; height: 100%; }
 }
 
 .modes .choice {
-  color: #234c94;
-  background: linear-gradient(#f9fdff, #deedff);
-  box-shadow: 0 4px 0 #558cc344, 0 7px 16px #5485be28;
+  color: var(--operation-ink);
+  background: linear-gradient(var(--operation-surface), var(--operation-tint));
+  box-shadow: 0 4px 0 var(--operation-shadow);
 }
 
 .modes #play-random {
@@ -556,6 +589,7 @@ main { position: relative; height: 100%; }
 }
 
 .complement .equation { font-size: min(11vw, calc(8 * var(--viewport-unit, 1vh)), 72px); }
+.complement #operator { color: var(--operation-ink); }
 .complement #answer { color: #4f3d93; background: #f1eaff; }
 .complement #second { min-width: 1em; text-align: center; }
 .complement .turn { height: 100%; }
@@ -643,15 +677,22 @@ main { position: relative; height: 100%; }
   .title-screen { gap: 6px; }
   .title-screen .logo { font-size: min(13vw, 11vh); }
   .main-mode, .other-modes { gap: 4px; }
-  .ten-preview {
-    --choice-piece: 11px;
-    --choice-number-size: 32px;
-  }
   .modes .choice {
     --choice-gap: 2px;
     --choice-pad: 4px;
   }
   #play-ten { min-height: 40px; }
+}
+
+@media (max-height: 420px) and (orientation: landscape) {
+  .title-screen {
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: clamp(8px, 3vw, 24px);
+  }
+  .title-screen .logo, .operations { grid-column: 1 / -1; }
+  #play-ten { min-width: min(34vw, 290px); }
+  .modes { width: min(56vw, 460px); }
 }
 
 .test-banner {

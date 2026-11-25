@@ -15,6 +15,7 @@ const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
 const operations = title.querySelectorAll<HTMLInputElement>('input[name="operation"]');
+const tenPreview = element('ten-preview');
 const playTen = element<HTMLButtonElement>('play-ten');
 const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
@@ -63,6 +64,10 @@ function showScore() {
 
 function showOperation() {
   operations.forEach(option => { option.checked = option.value === operation; });
+  document.body.dataset.operation = operation;
+  const { first, symbol, result } = equationFor({ total: mainTotal, known: 7 }, operation);
+  tenPreview.textContent = `${first} ${symbol} ? = ${result}`;
+  playTen.setAttribute('aria-label', operation === 'subtraction' ? `${mainTotal} から ひく` : `${mainTotal} を つくる`);
   showFavorites();
 }
 
@@ -354,8 +359,6 @@ function startMode(button: HTMLButtonElement, total: number, candidates?: number
   begin(total);
 }
 
-const tenPreview = makeNumberDisplay(mainTotal, 'blue');
-element('ten-preview').append(tenPreview.number, tenPreview.pieces);
 playTen.addEventListener('click', () => {
   if (game.hidden) startMode(playTen, mainTotal);
 });
