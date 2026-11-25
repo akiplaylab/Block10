@@ -21,7 +21,6 @@ const settingsOpen = element<HTMLButtonElement>('settings-open');
 const settings = element<HTMLDialogElement>('settings');
 const answerOptions = settings.querySelectorAll<HTMLInputElement>('input[name="answer-method"]');
 const sound = element<HTMLButtonElement>('sound');
-const hint = element<HTMLButtonElement>('hint');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
 const score = element('score');
@@ -47,7 +46,6 @@ let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
 const favoriteTotals = readFavoriteTotals();
 const randomTotals = readRandomTotals();
-let hintTimer: number | undefined;
 let clearTrial: (() => void) | undefined;
 
 function showSound() {
@@ -57,11 +55,6 @@ function showSound() {
 
 function showScore() {
   score.textContent = `🌈 × ${collected}`;
-}
-
-function clearHint() {
-  window.clearTimeout(hintTimer);
-  cells.forEach(cell => cell.classList.remove('glow'));
 }
 
 function makeBlock(color: 'orange' | 'blue') {
@@ -169,7 +162,6 @@ function makeAnswerForm(current: ComplementRound) {
 }
 
 function setInputEnabled(enabled: boolean) {
-  hint.setAttribute('aria-disabled', String(!enabled));
   supply.querySelectorAll('button').forEach(button => {
     button.setAttribute('aria-disabled', String(!enabled));
   });
@@ -190,7 +182,6 @@ function begin(total: number) {
   round = current;
   phase = 'choosing';
 
-  clearHint();
   effects.replaceChildren();
   feedback.textContent = '';
   overflow.replaceChildren();
@@ -203,7 +194,6 @@ function begin(total: number) {
   showScore();
   game.dataset.method = answerMethod;
   const showBlocks = answerMethod === 'blocks';
-  hint.hidden = !showBlocks;
   board.hidden = !showBlocks;
   next.hidden = true;
   result.hidden = true;
@@ -245,7 +235,6 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
 
   clearTrial?.();
   phase = 'animating';
-  clearHint();
   setInputEnabled(false);
   enableSound(soundEnabled);
   const correct = quantity === current.answer;
@@ -317,7 +306,6 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     second.classList.add('solved');
   }
   supply.hidden = true;
-  hint.hidden = true;
   result.hidden = false;
   next.hidden = false;
   if (blocks.length) burst(effects, result, 10);
@@ -413,7 +401,6 @@ setupTotalSelectors('random-settings', randomTotals, totals => {
 home.addEventListener('click', () => {
   round = undefined;
   clearTrial?.();
-  clearHint();
   effects.replaceChildren();
   game.hidden = true;
   document.body.classList.remove('playing');
@@ -448,14 +435,6 @@ sound.addEventListener('click', () => {
 
 next.addEventListener('click', () => {
   if (round && phase === 'complete') begin(randomCandidates ? drawTotal(randomCandidates) : round.total);
-});
-
-hint.addEventListener('click', () => {
-  if (!round || phase !== 'choosing' || hint.hidden) return;
-  clearHint();
-  round.hintCount += 1;
-  cells.slice(round.first).forEach(cell => cell.classList.add('glow'));
-  hintTimer = window.setTimeout(clearHint, 1450);
 });
 
 showSound();

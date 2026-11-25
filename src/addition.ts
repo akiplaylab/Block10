@@ -13,7 +13,6 @@ const game = element('game');
 game.querySelector('.feedback')?.remove();
 const home = element<HTMLButtonElement>('home');
 const sound = element<HTMLButtonElement>('sound');
-const hint = element<HTMLButtonElement>('hint');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
 const result = element('result');
@@ -38,16 +37,10 @@ rows[0].append(rainbow);
 let round: Round | undefined;
 let soundEnabled = readSound();
 let moving = false;
-let hintTimer: number | undefined;
 
 function showSound() {
   sound.setAttribute('aria-pressed', String(soundEnabled));
   element('sound-state').textContent = soundEnabled ? 'ON' : 'OFF';
-}
-
-function clearHint() {
-  window.clearTimeout(hintTimer);
-  game.querySelectorAll('.glow').forEach(item => item.classList.remove('glow'));
 }
 
 function describeBoard(current: Round) {
@@ -62,14 +55,11 @@ function begin(index: number) {
   const current = startProblem(index, performance.now());
   round = current;
   moving = false;
-  clearHint();
   effects.replaceChildren();
   title.hidden = true;
   game.hidden = false;
   document.body.classList.add('playing');
   home.hidden = false;
-  hint.hidden = false;
-  hint.disabled = false;
   next.hidden = true;
   result.hidden = true;
   supply.hidden = false;
@@ -102,7 +92,6 @@ async function moveBlock(current: Round, button: HTMLButtonElement) {
   if (round !== current || moving || button.classList.contains('used')) return;
 
   moving = true;
-  clearHint();
   enableSound(soundEnabled);
   const cell = cells[nextSlot(current)];
   const flyer = fly(effects, button, cell);
@@ -136,7 +125,6 @@ async function moveBlock(current: Round, button: HTMLButtonElement) {
     answer.textContent = String(nextSlot(current));
     answer.classList.add('solved');
     supply.hidden = true;
-    hint.hidden = true;
     result.hidden = false;
     next.hidden = false;
     cells.slice(0, nextSlot(current)).forEach(slot => slot.classList.add('celebrate'));
@@ -156,7 +144,6 @@ element('play').addEventListener('click', () => {
 
 home.addEventListener('click', () => {
   round = undefined;
-  clearHint();
   rows[0].classList.remove('flash');
   effects.replaceChildren();
   game.hidden = true;
@@ -175,16 +162,6 @@ sound.addEventListener('click', () => {
 
 next.addEventListener('click', () => {
   if (round) begin(nextProblem(round.index));
-});
-
-hint.addEventListener('click', () => {
-  if (!round || moving || round.placed === round.second) return;
-  const block = supply.querySelector('button:not(.used)');
-  clearHint();
-  round.hints += 1;
-  block?.classList.add('glow');
-  cells[nextSlot(round)].classList.add('glow');
-  hintTimer = window.setTimeout(clearHint, 1450);
 });
 
 showSound();
