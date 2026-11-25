@@ -34,6 +34,7 @@
     <header>
       <button id="home" class="utility" type="button" hidden><span aria-hidden="true">⌂</span> ホーム</button>
       <div id="score" class="score" aria-live="polite" hidden></div>
+      <button id="settings-open" class="utility" type="button">せってい</button>
       <button id="sound" class="utility sound" type="button" aria-label="おと" aria-pressed="true">
         <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">ON</span>
       </button>
@@ -72,6 +73,38 @@
         </div>
       </section>
     </main>
+    <dialog id="settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">せってい</h2>
+      <fieldset>
+        <legend>回答方法</legend>
+        <label class="answer-option">
+          <input type="radio" name="answer-method" value="blocks">
+          <span>ブロックつき</span>
+          <span class="method-preview" aria-hidden="true">
+            <span>3 + ? = 8</span>
+            <span class="preview-tiles"><i class="block blue"></i><i class="block blue"></i><i class="block blue"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i></span>
+            <span class="preview-choices"><b>4 <i class="block orange"></i></b><b>5 <i class="block orange"></i></b><b>6 <i class="block orange"></i></b></span>
+          </span>
+        </label>
+        <label class="answer-option">
+          <input type="radio" name="answer-method" value="choices">
+          <span>数字せんたく</span>
+          <span class="method-preview" aria-hidden="true">
+            <span>3 + ? = 8</span>
+            <span class="preview-choices"><b>4</b><b>5</b><b>6</b></span>
+          </span>
+        </label>
+        <label class="answer-option">
+          <input type="radio" name="answer-method" value="input">
+          <span>数字入力</span>
+          <span class="method-preview" aria-hidden="true">
+            <span>3 + ? = 8</span>
+            <span class="preview-input">5</span>
+          </span>
+        </label>
+      </fieldset>
+      <form method="dialog"><button class="utility" type="submit">とじる</button></form>
+    </dialog>
     <div id="effects" aria-hidden="true"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
