@@ -4,8 +4,8 @@ export type Operation = 'addition' | 'subtraction';
 
 export function equationFor({ total, known }: Pick<ComplementRound, 'total' | 'known'>, operation: Operation) {
   return operation === 'subtraction'
-    ? { first: total, symbol: '−', result: known }
-    : { first: known, symbol: '+', result: total };
+    ? { first: total, symbol: '−', result: known } as const
+    : { first: known, symbol: '+', result: total } as const;
 }
 
 export function recordAttempt(round: ComplementRound, selected: number) {

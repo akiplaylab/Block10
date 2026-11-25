@@ -484,7 +484,33 @@ main { position: relative; height: 100%; }
   font-size: clamp(14px, 3vw, 19px);
 }
 
-.operation-option b { font: 900 1.75em / 1 system-ui, sans-serif; }
+.operator-symbol {
+  position: relative;
+  flex: none;
+  width: .76em;
+  height: .76em;
+}
+
+.operator-symbol svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.operator-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.operation-option .operator-symbol { font-size: 1.6em; }
+.equation .operator-symbol, .ten-preview .operator-symbol { top: .05em; }
 .operations input:checked + span {
   background: var(--operation-ink);
   color: white;
@@ -493,6 +519,10 @@ main { position: relative; height: 100%; }
 .operations input:focus-visible + span { outline: 3px solid var(--operation-ink); outline-offset: 4px; }
 
 .ten-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .28em;
   padding: .06em .45em;
   border: 2px solid white;
   border-radius: 999px;

@@ -3,6 +3,7 @@ import { enableSound, playSound } from './audio';
 import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
+import { renderOperator } from './operator-symbol';
 import { drawTotal, mainTotal, selectableTotals } from './random-totals';
 import { isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound } from './storage';
 
@@ -15,7 +16,6 @@ const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
 const operations = title.querySelectorAll<HTMLInputElement>('input[name="operation"]');
-const tenPreview = element('ten-preview');
 const playTen = element<HTMLButtonElement>('play-ten');
 const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
@@ -64,7 +64,9 @@ function showOperation() {
   operations.forEach(option => { option.checked = option.value === operation; });
   document.body.dataset.operation = operation;
   const { first, symbol, result } = equationFor({ total: mainTotal, known: 7 }, operation);
-  tenPreview.textContent = `${first} ${symbol} ? = ${result}`;
+  element('preview-first').textContent = String(first);
+  renderOperator(element('preview-operator'), symbol);
+  element('preview-result').textContent = String(result);
   playTen.setAttribute('aria-label', operation === 'subtraction' ? `${mainTotal} から ひく` : `${mainTotal} を つくる`);
   showFavorites();
 }
@@ -219,7 +221,7 @@ function begin(total: number) {
   supply.hidden = false;
   const terms = equationFor(current, operation);
   first.textContent = String(terms.first);
-  element('operator').textContent = terms.symbol;
+  renderOperator(element('operator'), terms.symbol);
   second.textContent = '?';
   second.classList.remove('solved');
   element('answer').textContent = String(terms.result);
