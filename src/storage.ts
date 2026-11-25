@@ -15,6 +15,30 @@ const storagePrefix = import.meta.env.MODE === 'pages-test'
   : 'block10';
 const soundKey = `${storagePrefix}.sound`;
 const historyKey = `${storagePrefix}.history`;
+const answerMethodKey = `${storagePrefix}.answerMethod`;
+
+export type AnswerMethod = 'blocks' | 'choices' | 'input';
+
+export function isAnswerMethod(value: unknown): value is AnswerMethod {
+  return value === 'blocks' || value === 'choices' || value === 'input';
+}
+
+export function readAnswerMethod(): AnswerMethod {
+  try {
+    const value = localStorage.getItem(answerMethodKey);
+    return isAnswerMethod(value) ? value : 'blocks';
+  } catch {
+    return 'blocks';
+  }
+}
+
+export function saveAnswerMethod(method: AnswerMethod) {
+  try {
+    localStorage.setItem(answerMethodKey, method);
+  } catch {
+    return;
+  }
+}
 
 export function readSound() {
   try {

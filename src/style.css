@@ -137,6 +137,7 @@ header {
 }
 
 #home span { font-size: 1.45em; line-height: 1; }
+#settings-open { min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
 #hint span { color: #a42682; font-size: 1.23em; }
 .sound { margin-left: auto; min-width: 5.4em; }
 .speaker {
@@ -626,4 +627,106 @@ main { position: relative; height: 100%; }
   color: #334155;
   font: 600 0.75rem / 1.4 system-ui, sans-serif;
   pointer-events: none;
+}
+
+#settings {
+  width: min(calc(100% - 24px), 420px);
+  max-height: calc(100% - 24px);
+  padding: clamp(12px, 4vw, 22px);
+  border: 2px solid white;
+  border-radius: 22px;
+  color: inherit;
+  background: #f5fbff;
+  box-shadow: 0 12px 42px #21376255;
+  touch-action: pan-y;
+}
+
+body:has(#settings[open]) { touch-action: pan-y; }
+#settings::backdrop { background: #21376270; }
+#settings h2 { margin: 0 0 8px; font-size: 1.2rem; }
+#settings fieldset { display: grid; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
+#settings legend { margin-bottom: 6px; font-size: .95rem; }
+#settings form { margin-top: 10px; text-align: right; }
+
+.answer-option {
+  display: grid;
+  grid-template-columns: auto 1fr minmax(72px, auto);
+  gap: clamp(6px, 2vw, 12px);
+  align-items: center;
+  padding: 6px 8px;
+  min-height: 56px;
+  border: 2px solid #d8e9fa;
+  border-radius: 12px;
+  background: white;
+  font-size: clamp(13px, 4vw, 16px);
+  cursor: pointer;
+}
+
+.answer-option:has(:checked) { border-color: #567bd0; background: #eaf1ff; }
+.answer-option input { margin: 0; accent-color: #4c65b4; }
+.method-preview { display: grid; justify-items: center; gap: 2px; font: 800 12px / 1 system-ui, sans-serif; }
+.preview-tiles, .preview-choices, .preview-choices b { display: flex; align-items: center; gap: 2px; }
+.method-preview i { width: 7px; height: 7px; box-shadow: none; }
+.preview-choices b, .preview-input { padding: 2px 4px; border-radius: 4px; background: #ffedcb; color: #9c4709; }
+.preview-input { min-width: 28px; text-align: center; border: 1px solid #9ab4d7; background: white; }
+
+.complement:is([data-method="choices"], [data-method="input"]) {
+  grid-template-areas: "equation" "feedback" "turn" "actions";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto var(--feedback-height) auto auto;
+}
+
+.complement .equation { grid-area: equation; }
+.complement .feedback { grid-area: feedback; }
+.complement .turn { grid-area: turn; }
+.complement .actions { grid-area: actions; }
+.complement[data-method="blocks"] { grid-template-areas: "equation" "board" "feedback" "turn" "actions"; }
+.complement[data-method="blocks"] .frame { grid-area: board; }
+
+@media (orientation: landscape) and (max-height: 580px) {
+  .complement[data-method="blocks"] { grid-template-areas: "equation actions" "board turn" "feedback feedback"; }
+}
+
+.complement[data-method="choices"] .choice {
+  height: auto;
+  min-height: max(52px, var(--control));
+  grid-template-rows: auto;
+  place-items: center;
+}
+
+.complement[data-method="input"] .supply { display: block; width: min(94vw, 260px); }
+.answer-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.answer-form output {
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  min-height: 44px;
+  border: 2px solid #9ab4d7;
+  border-radius: 12px;
+  background: #f5fbff;
+  color: #213762;
+  font: 900 26px / 1 system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.answer-form button { width: auto; height: 44px; min-height: 44px; padding: 0; border-radius: 12px; }
+.answer-form button[type="submit"] { background: #e1d8ff; color: #4f3d93; }
+.answer-form.shake { animation: shake 280ms ease-in-out; }
+.equation.flash { animation: flash 155ms ease-in-out both; }
+.complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
+.number-flyer {
+  position: fixed;
+  font-variant-numeric: tabular-nums;
+  -webkit-text-stroke: .12em white;
+  paint-order: stroke fill;
+}
+#supply .number-in-flight { color: transparent; }
+
+@media (orientation: landscape) and (max-height: 420px) {
+  .complement[data-method="input"] {
+    grid-template-areas: "equation turn" "feedback turn" "actions turn";
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+  .complement[data-method="input"] .supply { width: min(100%, 360px); }
+  .answer-form { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
