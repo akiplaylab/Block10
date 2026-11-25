@@ -1,6 +1,6 @@
 import './style.css';
 import { enableSound, playSound } from './audio';
-import { burst, fly, pause } from './effects';
+import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, totals, type ComplementRound, type Total } from './complement';
 import { initializeOffline } from './offline';
 import { isAnswerMethod, readAnswerMethod, readSound, saveAnswerMethod, saveComplementCompletion, saveSound } from './storage';
@@ -262,27 +262,38 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
 
   playSound('place');
   const celebration = blocks.length ? board : equation;
-  celebration.classList.add('flash');
-  await pause(155);
-  if (round !== current) return;
-
-  celebration.classList.remove('flash');
   if (blocks.length) {
+    board.classList.add('flash');
+    await pause(155);
+    if (round !== current) return;
+
+    board.classList.remove('flash');
     board.classList.add('merged');
     rainbow.hidden = false;
     board.setAttribute('aria-label', `にじの ${current.total} が 1こ`);
+  } else {
+    const input = control.querySelector('input');
+    await flyNumber(effects, input ?? control, second, input?.value ?? String(quantity));
+    if (round !== current) return;
+
+    second.textContent = String(quantity);
+    second.classList.add('solved');
+    equation.classList.add('flash');
   }
   burst(effects, celebration, 12);
   playSound('ten');
   await pause(280);
   if (round !== current) return;
 
+  equation.classList.remove('flash');
   phase = 'complete';
   collected += 1;
   showScore();
   saveComplementCompletion(current);
-  second.textContent = String(quantity);
-  second.classList.add('solved');
+  if (blocks.length) {
+    second.textContent = String(quantity);
+    second.classList.add('solved');
+  }
   supply.hidden = true;
   hint.hidden = true;
   result.hidden = false;

@@ -39,3 +39,35 @@ export function fly(effects: HTMLElement, source: HTMLElement, destination: HTML
   effects.append(flyer);
   return flyer;
 }
+
+export async function flyNumber(effects: HTMLElement, source: HTMLElement, destination: HTMLElement, value: string) {
+  if (reduceMotion.matches) return;
+
+  const from = source.getBoundingClientRect();
+  const to = destination.getBoundingClientRect();
+  const sourceStyle = getComputedStyle(source);
+  const destinationStyle = getComputedStyle(destination);
+  const scale = parseFloat(sourceStyle.fontSize) / parseFloat(destinationStyle.fontSize);
+  const flyer = document.createElement('span');
+  flyer.className = 'number-flyer';
+  flyer.textContent = value;
+  flyer.style.left = `${to.x + to.width / 2}px`;
+  flyer.style.top = `${to.y + to.height / 2}px`;
+  flyer.style.font = destinationStyle.font;
+  flyer.style.color = destinationStyle.color;
+  effects.append(flyer);
+
+  const dx = from.x + from.width / 2 - (to.x + to.width / 2);
+  const dy = from.y + from.height / 2 - (to.y + to.height / 2);
+  const motion = flyer.animate([
+    { transform: `translate(${dx}px, ${dy}px) translate(-50%, -50%) scale(${scale})` },
+    { transform: 'translate(-50%, -50%)' },
+  ], { duration: 250, easing: 'cubic-bezier(.24,.78,.24,1)', fill: 'both' });
+  source.classList.add('number-in-flight');
+  try {
+    await motion.finished.catch(() => {});
+  } finally {
+    source.classList.remove('number-in-flight');
+    flyer.remove();
+  }
+}

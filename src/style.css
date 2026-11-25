@@ -137,6 +137,7 @@ header {
 }
 
 #home span { font-size: 1.45em; line-height: 1; }
+#settings-open { min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
 #hint span { color: #a42682; font-size: 1.23em; }
 .sound { margin-left: auto; min-width: 5.4em; }
 .speaker {
@@ -712,6 +713,9 @@ body:has(#settings[open]) { touch-action: pan-y; }
 .answer-form button:last-child { grid-column: span 2; }
 .answer-form.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
+.complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
+.number-flyer { position: fixed; font-variant-numeric: tabular-nums; }
+#supply .number-in-flight { color: transparent; }
 
 @media (orientation: landscape) and (max-height: 420px) {
   .complement[data-method="input"] {
