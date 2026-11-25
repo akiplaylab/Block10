@@ -33,7 +33,10 @@
     </div>
     <header>
       <button id="home" class="utility" type="button" hidden><span aria-hidden="true">⌂</span> ホーム</button>
-      <div id="score" class="score" aria-live="polite" hidden></div>
+      <div id="score" class="score" aria-live="polite" hidden>
+        <span id="correct-count"></span>
+        <span id="answer-count"></span>
+      </div>
       <button id="settings-open" class="utility" type="button" aria-label="せってい">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
           <path d="M10 2h4l.6 2.5 2.1 1.2 2.5-.7 2 3.5-1.9 1.8v2.4l1.9 1.8-2 3.5-2.5-.7-2.1 1.2L14 21h-4l-.6-2.5-2.1-1.2-2.5.7-2-3.5 1.9-1.8v-2.4L2.8 8.5l2-3.5 2.5.7 2.1-1.2z" transform="translate(0 .5)"/>
@@ -49,6 +52,10 @@
         <h1 class="logo" aria-label="ブロック 10">
           <span aria-hidden="true">ブ</span><span aria-hidden="true">ロ</span><span aria-hidden="true">ッ</span><span aria-hidden="true">ク</span><strong aria-hidden="true">10</strong>
         </h1>
+        <div class="operations" role="group" aria-label="あそぶ けいさん">
+          <label><input type="radio" name="operation" value="addition" checked><span>たしざん</span></label>
+          <label><input type="radio" name="operation" value="subtraction"><span>ひきざん</span></label>
+        </div>
         <div class="main-mode">
           <div id="ten-preview" class="ten-preview" aria-hidden="true"></div>
           <button id="play-ten" class="primary" type="button" aria-label="10 で あそぶ">あそぶ</button>
@@ -66,7 +73,7 @@
       </section>
       <section id="game" class="game-screen complement" aria-label="ブロック 10" hidden>
         <div class="equation" aria-live="polite" aria-atomic="true">
-          <span id="first"></span><span>+</span><span id="second"></span><span>=</span><span id="answer">?</span>
+          <span id="first"></span><span id="operator">+</span><span id="second"></span><span>=</span><span id="answer">?</span>
         </div>
         <div id="board" class="board frame" role="img"></div>
         <div class="feedback">

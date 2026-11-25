@@ -1,5 +1,19 @@
 export const blocksPerRow = 5;
 
+export type Operation = 'addition' | 'subtraction';
+
+export function equationFor({ total, known }: ComplementRound, operation: Operation) {
+  return operation === 'subtraction'
+    ? { first: total, symbol: '−', result: known }
+    : { first: known, symbol: '+', result: total };
+}
+
+export function recordAttempt(round: ComplementRound, selected: number) {
+  const correct = selected === round.answer;
+  round.attempts.push({ selected, correct });
+  return correct;
+}
+
 function shuffle<T>(values: readonly T[], random: () => number) {
   const shuffled = [...values];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -23,9 +37,9 @@ export function createQuestionSource(total: number, random = Math.random) {
       }
     }
 
-    const first = deck.shift()!;
-    previous = first;
-    const answer = total - first;
+    const known = deck.shift()!;
+    previous = known;
+    const answer = total - known;
     const fewer = shuffle(quantities.filter(quantity => quantity < answer), random);
     const more = shuffle(quantities.filter(quantity => quantity > answer), random);
     const distractors = fewer.length && more.length
@@ -34,7 +48,7 @@ export function createQuestionSource(total: number, random = Math.random) {
 
     return {
       total,
-      first,
+      known,
       answer,
       choices: shuffle([answer, ...distractors], random),
       attempts: [] as Attempt[],
