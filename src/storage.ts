@@ -1,6 +1,6 @@
 import type { Round } from './game';
 import type { ComplementRound } from './complement';
-import { defaultRandomTotals, parseRandomTotals, type RandomTotals } from './random-totals';
+import { defaultCustomTotals, defaultRandomTotals, parseRandomTotals, type CustomTotals, type RandomTotals } from './random-totals';
 
 type Completion = {
   problemIndex: number;
@@ -42,17 +42,20 @@ export function saveAnswerMethod(method: AnswerMethod) {
   }
 }
 
-export function readRandomTotals() {
+export function readRandomTotals(): { active: RandomTotals; custom: CustomTotals } {
   try {
-    return parseRandomTotals(JSON.parse(localStorage.getItem(randomTotalsKey) ?? 'null')) ?? defaultRandomTotals;
+    const saved = JSON.parse(localStorage.getItem(randomTotalsKey) ?? 'null');
+    const active = parseRandomTotals(saved?.active ?? saved) ?? defaultRandomTotals;
+    const custom = parseRandomTotals(saved?.custom);
+    return { active, custom: active.preset === 'custom' ? active : custom?.preset === 'custom' ? custom : defaultCustomTotals };
   } catch {
-    return defaultRandomTotals;
+    return { active: defaultRandomTotals, custom: defaultCustomTotals };
   }
 }
 
-export function saveRandomTotals(config: RandomTotals) {
+export function saveRandomTotals(active: RandomTotals, custom: CustomTotals) {
   try {
-    localStorage.setItem(randomTotalsKey, JSON.stringify(config));
+    localStorage.setItem(randomTotalsKey, JSON.stringify({ active, custom }));
   } catch {
     return;
   }

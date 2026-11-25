@@ -3,7 +3,7 @@ import { enableSound, playSound } from './audio';
 import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, totals, type ComplementRound, type Total } from './complement';
 import { initializeOffline } from './offline';
-import { candidateTotals, configuredRange, drawTotal, minimumTotal, parseRandomTotals, randomPresets, totalLimit, type RandomTotals } from './random-totals';
+import { candidateTotals, configuredRange, defaultRandomTotals, drawTotal, minimumTotal, parseRandomTotals, randomKinds, randomMaximums, totalLimit, type RandomTotals, type StandardTotals } from './random-totals';
 import { isAnswerMethod, readAnswerMethod, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveRandomTotals, saveSound } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
@@ -20,12 +20,12 @@ const home = element<HTMLButtonElement>('home');
 const settingsOpen = element<HTMLButtonElement>('settings-open');
 const settings = element<HTMLDialogElement>('settings');
 const answerOptions = settings.querySelectorAll<HTMLInputElement>('input[name="answer-method"]');
-const randomSettings = element<HTMLFormElement>('random-settings');
-const randomPreset = element<HTMLSelectElement>('random-preset');
+const settingsClose = element<HTMLButtonElement>('settings-close');
+const randomCustom = element<HTMLDetailsElement>('random-custom');
 const randomMin = element<HTMLInputElement>('random-min');
 const randomMax = element<HTMLInputElement>('random-max');
 const randomStep = element<HTMLSelectElement>('random-step');
-const randomSave = element<HTMLButtonElement>('random-save');
+const useCustom = element<HTMLButtonElement>('use-custom');
 const sound = element<HTMLButtonElement>('sound');
 const hint = element<HTMLButtonElement>('hint');
 const next = element<HTMLButtonElement>('next');
@@ -51,7 +51,9 @@ let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
 let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
-let randomTotals = readRandomTotals();
+let { active: randomTotals, custom: customTotals } = readRandomTotals();
+let standardTotals = randomTotals.preset === 'standard' ? randomTotals : defaultRandomTotals;
+let customError = '';
 let hintTimer: number | undefined;
 let clearTrial: (() => void) | undefined;
 
@@ -374,6 +376,16 @@ function showRandomMode() {
     ? String(candidates[0])
     : `${candidates[0]}～${candidates[candidates.length - 1]}${range.step === 1 ? '' : `（${range.step}ずつ）`}`;
   element('random-summary').textContent = summary;
+  const chipValues = candidates.length <= 3 ? candidates : [
+    candidates[0],
+    candidates[Math.floor((candidates.length - 1) / 2)],
+    candidates[candidates.length - 1],
+  ];
+  element('random-chips').replaceChildren(...chipValues.map(value => {
+    const chip = document.createElement('span');
+    chip.textContent = String(value);
+    return chip;
+  }));
   const warning = element('random-warning');
   warning.textContent = rangeWarning(randomTotals);
   warning.hidden = !warning.textContent;
@@ -388,39 +400,94 @@ playRandom.addEventListener('click', () => {
 
 function readRangeDraft() {
   return parseRandomTotals({
-    preset: randomPreset.value,
+    preset: 'custom',
     min: randomMin.valueAsNumber,
     max: randomMax.valueAsNumber,
     step: Number(randomStep.value),
   });
 }
 
-function showRangeDraft() {
-  const custom = randomPreset.value === 'custom';
-  element('random-custom').hidden = !custom;
-  randomMin.disabled = randomMax.disabled = randomStep.disabled = !custom;
-  const config = readRangeDraft();
-  const preview = element('random-candidates');
-  element('random-limit').textContent = `この回答方法で使える範囲は ${minimumTotal} ～ ${totalLimit(answerMethod)} です。`;
-  preview.textContent = config
-    ? `出題候補（${candidateTotals(configuredRange(config)).join('、')}） ${rangeWarning(config)}`.trim()
-    : '2 ～ 100 の整数を、最小値 ≤ 最大値になるように入力してください。';
-  randomSave.disabled = !config || JSON.stringify(config) === JSON.stringify(randomTotals);
+function writeRangeDraft() {
+  randomMin.value = String(customTotals.min);
+  randomMax.value = String(customTotals.max);
+  randomStep.value = String(customTotals.step);
 }
 
-for (const [value, preset] of Object.entries(randomPresets)) {
-  randomPreset.add(new Option(preset.label, value));
-}
-randomPreset.add(new Option('カスタム', 'custom'));
-randomSettings.addEventListener('input', showRangeDraft);
-randomSettings.addEventListener('submit', event => {
-  event.preventDefault();
-  const config = readRangeDraft();
-  if (!config) return;
+function applyRandomTotals(config: RandomTotals) {
   randomTotals = config;
-  saveRandomTotals(config);
+  customError = '';
+  if (config.preset === 'standard') {
+    standardTotals = config;
+    writeRangeDraft();
+  } else {
+    customTotals = config;
+  }
+  saveRandomTotals(randomTotals, customTotals);
   showRandomMode();
-  showRangeDraft();
+  showRangeSettings();
+}
+
+function applyCustomDraft() {
+  const config = readRangeDraft();
+  customError = config
+    ? rangeWarning(config)
+    : '最小値・最大値には 2 ～ 100 の整数を入れ、最小値を最大値以下にしてください。';
+  if (config && !customError) applyRandomTotals(config);
+  else showRangeSettings();
+}
+
+function addRangeOption(group: string, label: string, change: Partial<StandardTotals>) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  const selection = () => ({ ...standardTotals, ...change });
+  button.addEventListener('click', () => applyRandomTotals(selection()));
+  element(group).append(button);
+  return (pressed: boolean) => {
+    const config = selection();
+    const unavailable = rangeWarning(config);
+    const empty = !candidateTotals(configuredRange(config)).length;
+    button.disabled = !!unavailable || empty;
+    button.setAttribute('aria-pressed', String(pressed));
+    button.title = unavailable || (empty ? '出題候補がありません。' : '');
+  };
+}
+
+const maxOptions = randomMaximums.map(max => {
+  const update = addRangeOption('random-maximums', String(max), { max });
+  return () => update(standardTotals.max === max);
+});
+const kindOptions = (Object.keys(randomKinds) as (keyof typeof randomKinds)[]).map(kind => {
+  const update = addRangeOption('random-kinds', randomKinds[kind], { kind });
+  return () => update(standardTotals.kind === kind);
+});
+
+function showRangeSettings() {
+  maxOptions.forEach(update => update());
+  kindOptions.forEach(update => update());
+  const limit = totalLimit(answerMethod);
+  element('random-limit').textContent = `この回答方法で使える範囲は ${minimumTotal} ～ ${limit} です。`;
+  const candidates = candidateTotals(configuredRange(randomTotals));
+  const summary = candidates.length <= 5
+    ? candidates.join('、')
+    : `${candidates.slice(0, 3).join('、')} … ${candidates[candidates.length - 1]}（${candidates.length} 件）`;
+  const mode = randomTotals.preset === 'standard' ? '通常' : 'カスタム';
+  element('random-candidates').textContent = `適用中（${mode}） ${summary}`;
+  const error = element('random-error');
+  error.textContent = customError || rangeWarning(randomTotals);
+  error.hidden = !error.textContent;
+  settingsClose.disabled = !error.hidden;
+  const draft = readRangeDraft();
+  useCustom.disabled = !draft || !!rangeWarning(draft) || (randomTotals.preset === 'custom' && !customError);
+}
+
+randomCustom.addEventListener('input', applyCustomDraft);
+useCustom.addEventListener('click', applyCustomDraft);
+settings.addEventListener('cancel', event => {
+  if (settingsClose.disabled) event.preventDefault();
+});
+settingsClose.form?.addEventListener('submit', event => {
+  if (settingsClose.disabled) event.preventDefault();
 });
 
 home.addEventListener('click', () => {
@@ -440,12 +507,9 @@ home.addEventListener('click', () => {
 
 settingsOpen.addEventListener('click', () => {
   answerOptions.forEach(option => { option.checked = option.value === answerMethod; });
-  const range = configuredRange(randomTotals);
-  randomPreset.value = randomTotals.preset;
-  randomMin.value = String(range.min);
-  randomMax.value = String(range.max);
-  randomStep.value = String(range.step);
-  showRangeDraft();
+  randomCustom.open = false;
+  writeRangeDraft();
+  showRangeSettings();
   settings.showModal();
   settings.querySelector<HTMLInputElement>('input:checked')?.focus();
 });
@@ -455,7 +519,8 @@ settings.addEventListener('change', event => {
   if (option instanceof HTMLInputElement && option.checked && isAnswerMethod(option.value)) {
     answerMethod = option.value;
     saveAnswerMethod(answerMethod);
-    showRangeDraft();
+    if (customError) applyCustomDraft();
+    else showRangeSettings();
     showRandomMode();
   }
 });

@@ -33,6 +33,31 @@ test('候補の境界と不正な保存値を検証する', () => {
   assert.deepEqual(['blocks', 'choices', 'input'].map(totalLimit), [20, 100, 100]);
 });
 
+test('通常設定は上限までの倍数を使い、候補が空になる組み合わせを拒否する', () => {
+  const config = { preset: 'standard', max: 30, kind: 'five' };
+  assert.deepEqual(parseRandomTotals(config), config);
+  assert.deepEqual(candidateTotals(configuredRange(config)), [5, 10, 15, 20, 25, 30]);
+  assert.equal(parseRandomTotals({ preset: 'standard', max: 5, kind: 'ten' }), undefined);
+});
+
+test('旧プリセットとカスタムの候補を移行後も維持する', () => {
+  const expected = {
+    'single-digit': { min: 2, max: 9, step: 1 },
+    'to-10': { min: 2, max: 10, step: 1 },
+    'to-20': { min: 2, max: 20, step: 1 },
+    'two-digits': { min: 10, max: 99, step: 1 },
+    'multiples-of-5': { min: 5, max: 100, step: 5 },
+    'multiples-of-10': { min: 10, max: 100, step: 10 },
+    'to-100': { min: 2, max: 100, step: 1 },
+  };
+  for (const [preset, range] of Object.entries(expected)) {
+    const config = parseRandomTotals({ preset });
+    assert.deepEqual(candidateTotals(configuredRange(config)), candidateTotals(range));
+  }
+  const custom = { preset: 'custom', min: 7, max: 24, step: 5 };
+  assert.deepEqual(parseRandomTotals(custom), custom);
+});
+
 test('合計 2 を繰り返しても正の加数と選択肢が壊れない', () => {
   const question = createQuestionSource(2, () => 0);
   for (let index = 0; index < 5; index += 1) {
