@@ -694,27 +694,32 @@ body:has(#settings[open]) { touch-action: pan-y; }
   place-items: center;
 }
 
-.complement[data-method="input"] .supply { display: block; width: min(94vw, 360px); }
-.answer-form { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
-.answer-form input {
-  grid-column: span 3;
-  min-width: 0;
+.complement[data-method="input"] .supply { display: block; width: min(94vw, 260px); }
+.answer-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.answer-form output {
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  min-height: 44px;
   border: 2px solid #9ab4d7;
   border-radius: 12px;
-  background: white;
-  color: #9c4709;
+  background: #f5fbff;
+  color: #213762;
   font: 900 26px / 1 system-ui, sans-serif;
-  text-align: center;
-  user-select: text;
+  font-variant-numeric: tabular-nums;
 }
 
 .answer-form button { width: auto; height: 44px; min-height: 44px; padding: 0; border-radius: 12px; }
-.answer-form button[type="submit"] { grid-column: span 3; }
-.answer-form button:last-child { grid-column: span 2; }
+.answer-form button[type="submit"] { background: #e1d8ff; color: #4f3d93; }
 .answer-form.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
 .complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
-.number-flyer { position: fixed; font-variant-numeric: tabular-nums; }
+.number-flyer {
+  position: fixed;
+  font-variant-numeric: tabular-nums;
+  -webkit-text-stroke: .12em white;
+  paint-order: stroke fill;
+}
 #supply .number-in-flight { color: transparent; }
 
 @media (orientation: landscape) and (max-height: 420px) {
@@ -723,4 +728,5 @@ body:has(#settings[open]) { touch-action: pan-y; }
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   }
   .complement[data-method="input"] .supply { width: min(100%, 360px); }
+  .answer-form { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }

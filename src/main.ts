@@ -105,47 +105,67 @@ function makeChoice(current: ComplementRound, quantity: number) {
 function makeAnswerForm(current: ComplementRound) {
   const form = document.createElement('form');
   form.className = 'answer-form';
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.inputMode = 'none';
-  input.autocomplete = 'off';
-  input.maxLength = String(current.total - 1).length;
-  input.placeholder = '?';
-  input.setAttribute('aria-label', 'こたえ');
-  const submit = document.createElement('button');
-  submit.type = 'submit';
-  submit.className = 'utility';
-  submit.textContent = 'こたえる';
-  form.append(input, submit);
+  form.tabIndex = -1;
+  form.setAttribute('aria-label', '数字入力');
+  const display = document.createElement('output');
+  display.textContent = '?';
+  display.setAttribute('aria-label', 'こたえ');
+  form.append(display);
 
-  for (const digit of '1234567890') {
+  const maxDigits = String(current.total - 1).length;
+  let value = '';
+  let replaceOnDigit = false;
+
+  function clear() {
+    if (phase !== 'choosing') return;
+    clearTrial?.();
+    value = '';
+    display.textContent = '?';
+    replaceOnDigit = false;
+  }
+
+  function addDigit(digit: string) {
+    if (phase !== 'choosing') return;
+    if (replaceOnDigit) clear();
+    if (value.length >= maxDigits) return;
+    value += digit;
+    display.textContent = value;
+  }
+
+  for (const digit of '123456789C0') {
     const key = document.createElement('button');
     key.type = 'button';
     key.className = 'utility';
     key.textContent = digit;
-    key.addEventListener('click', () => {
-      if (phase === 'choosing' && input.value.length < input.maxLength) input.value += digit;
-    });
+    if (digit === 'C') {
+      key.setAttribute('aria-label', 'C すべてけす');
+      key.addEventListener('click', clear);
+    } else {
+      key.addEventListener('click', () => addDigit(digit));
+    }
     form.append(key);
   }
 
-  const erase = document.createElement('button');
-  erase.type = 'button';
-  erase.className = 'utility';
-  erase.textContent = '⌫';
-  erase.setAttribute('aria-label', 'さいごの数字をけす');
-  erase.addEventListener('click', () => {
-    if (phase === 'choosing') input.value = input.value.slice(0, -1);
-  });
-  form.append(erase);
-  input.addEventListener('input', () => {
-    input.value = input.value.replace(/[^0-9]/g, '').slice(0, input.maxLength);
-  });
-  form.addEventListener('submit', event => {
+  const submit = document.createElement('button');
+  submit.type = 'submit';
+  submit.className = 'utility';
+  submit.textContent = 'OK';
+  form.append(submit);
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (input.value) void choose(current, Number(input.value), form);
+    if (!value) return;
+    if (await choose(current, Number(value), form) === false) replaceOnDigit = true;
   });
-  return { form, input };
+  form.addEventListener('keydown', event => {
+    if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
+    const key = event.key;
+    if (/^[0-9]$/.test(key)) addDigit(key);
+    else if (key === 'c' || key === 'C' || key === 'Delete') clear();
+    else if (key === 'Enter') form.requestSubmit();
+    else return;
+    event.preventDefault();
+  });
+  return form;
 }
 
 function setInputEnabled(enabled: boolean) {
@@ -153,8 +173,6 @@ function setInputEnabled(enabled: boolean) {
   supply.querySelectorAll('button').forEach(button => {
     button.setAttribute('aria-disabled', String(!enabled));
   });
-  const input = supply.querySelector('input');
-  if (input) input.readOnly = !enabled;
 }
 
 function describeBoard(current: ComplementRound) {
@@ -204,10 +222,10 @@ function begin(total: Total) {
   if (showBlocks) describeBoard(current);
   if (answerMethod === 'input') {
     supply.setAttribute('aria-label', '数字入力');
-    const { form, input } = makeAnswerForm(current);
+    const form = makeAnswerForm(current);
     supply.replaceChildren(form);
     setInputEnabled(true);
-    input.focus({ preventScroll: true });
+    form.focus({ preventScroll: true });
     return;
   }
   supply.setAttribute('aria-label', showBlocks ? 'おくブロック' : 'こたえの せんたくし');
@@ -257,11 +275,10 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     };
     phase = 'choosing';
     setInputEnabled(true);
-    return;
+    return false;
   }
 
   playSound('place');
-  const celebration = blocks.length ? board : equation;
   if (blocks.length) {
     board.classList.add('flash');
     await pause(155);
@@ -271,16 +288,16 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     board.classList.add('merged');
     rainbow.hidden = false;
     board.setAttribute('aria-label', `にじの ${current.total} が 1こ`);
+    burst(effects, board, 12);
   } else {
-    const input = control.querySelector('input');
-    await flyNumber(effects, input ?? control, second, input?.value ?? String(quantity));
+    const source = control.querySelector('output') ?? control;
+    await flyNumber(effects, source, second, source.textContent ?? String(quantity));
     if (round !== current) return;
 
     second.textContent = String(quantity);
     second.classList.add('solved');
     equation.classList.add('flash');
   }
-  burst(effects, celebration, 12);
   playSound('ten');
   await pause(280);
   if (round !== current) return;
@@ -298,7 +315,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   hint.hidden = true;
   result.hidden = false;
   next.hidden = false;
-  burst(effects, result, 10);
+  if (blocks.length) burst(effects, result, 10);
   playSound('success');
   next.focus({ preventScroll: true });
 }
