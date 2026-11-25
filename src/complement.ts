@@ -11,7 +11,7 @@ function shuffle<T>(values: readonly T[], random: () => number) {
   return shuffled;
 }
 
-export function createQuestionSource(total: Total, random = Math.random) {
+export function createQuestionSource(total: number, random = Math.random) {
   const quantities = Array.from({ length: total - 1 }, (_, index) => index + 1);
   let deck: number[] = [];
   let previous: number | undefined;
@@ -19,7 +19,7 @@ export function createQuestionSource(total: Total, random = Math.random) {
   return (startedAt: number) => {
     if (deck.length === 0) {
       deck = shuffle(quantities, random);
-      if (deck[0] === previous) {
+      if (deck.length > 1 && deck[0] === previous) {
         const swap = 1 + Math.floor(random() * (deck.length - 1));
         [deck[0], deck[swap]] = [deck[swap], deck[0]];
       }

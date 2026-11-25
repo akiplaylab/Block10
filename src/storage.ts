@@ -1,5 +1,6 @@
 import type { Round } from './game';
 import type { ComplementRound } from './complement';
+import { defaultRandomTotals, parseRandomTotals, type RandomTotals } from './random-totals';
 
 type Completion = {
   problemIndex: number;
@@ -16,6 +17,7 @@ const storagePrefix = import.meta.env.MODE === 'pages-test'
 const soundKey = `${storagePrefix}.sound`;
 const historyKey = `${storagePrefix}.history`;
 const answerMethodKey = `${storagePrefix}.answerMethod`;
+const randomTotalsKey = `${storagePrefix}.randomTotals`;
 
 export type AnswerMethod = 'blocks' | 'choices' | 'input';
 
@@ -35,6 +37,22 @@ export function readAnswerMethod(): AnswerMethod {
 export function saveAnswerMethod(method: AnswerMethod) {
   try {
     localStorage.setItem(answerMethodKey, method);
+  } catch {
+    return;
+  }
+}
+
+export function readRandomTotals() {
+  try {
+    return parseRandomTotals(JSON.parse(localStorage.getItem(randomTotalsKey) ?? 'null')) ?? defaultRandomTotals;
+  } catch {
+    return defaultRandomTotals;
+  }
+}
+
+export function saveRandomTotals(config: RandomTotals) {
+  try {
+    localStorage.setItem(randomTotalsKey, JSON.stringify(config));
   } catch {
     return;
   }
@@ -73,12 +91,14 @@ export function saveCompletion(round: Round) {
   }
 }
 
-export function saveComplementCompletion(round: ComplementRound) {
-  const key = `${storagePrefix}.${round.total === 10 ? 'makeTen' : 'make' + round.total}.history`;
+export function saveComplementCompletion(round: ComplementRound, randomMode = false) {
+  const mode = randomMode ? 'random' : round.total === 10 ? 'makeTen' : 'make' + round.total;
+  const key = `${storagePrefix}.${mode}.history`;
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
     const history = Array.isArray(saved) ? saved : [];
     history.push({
+      ...(randomMode ? { total: round.total } : {}),
       first: round.first,
       choices: round.choices,
       attempts: round.attempts,

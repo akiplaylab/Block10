@@ -55,7 +55,13 @@
         </div>
         <div class="other-modes">
           <p id="other-modes-label">ほかの かずで あそぶ</p>
-          <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label"></div>
+          <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label">
+            <button id="play-random" class="choice" type="button" aria-describedby="random-warning">
+              <span>ランダム</span>
+              <span id="random-summary"></span>
+            </button>
+          </div>
+          <p id="random-warning" class="range-warning" role="status" hidden></p>
         </div>
         <p id="offline-ready" class="offline-ready" role="status" hidden>オフラインであそべます</p>
       </section>
@@ -108,6 +114,27 @@
           </span>
         </label>
       </fieldset>
+      <form id="random-settings">
+        <fieldset>
+          <legend>ランダム出題</legend>
+          <p id="random-limit"></p>
+          <label for="random-preset">出題範囲</label>
+          <select id="random-preset" aria-describedby="random-limit"></select>
+          <div id="random-custom" hidden>
+            <label>最小値 <input id="random-min" type="number" inputmode="numeric" min="2" max="100" required></label>
+            <label>最大値 <input id="random-max" type="number" inputmode="numeric" min="2" max="100" required></label>
+            <label>間隔
+              <select id="random-step">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+              </select>
+            </label>
+          </div>
+          <output id="random-candidates" role="status"></output>
+          <button id="random-save" class="utility" type="submit">出題範囲を保存</button>
+        </fieldset>
+      </form>
       <form method="dialog"><button class="utility" type="submit">とじる</button></form>
     </dialog>
     <div id="effects" aria-hidden="true"></div>

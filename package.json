@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "node --experimental-strip-types --test",
     "build": "tsc --noEmit && vite build",
     "build:test": "tsc --noEmit && vite build --mode pages-test",
     "preview": "vite preview"
