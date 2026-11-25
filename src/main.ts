@@ -1,10 +1,9 @@
 import './style.css';
 import { enableSound, playSound } from './audio';
 import { burst, fly, pause } from './effects';
-import { rowSize } from './game';
-import { createQuestionSource, type MakeTenRound } from './make-ten';
+import { blocksPerRow, createQuestionSource, totals, type ComplementRound, type Total } from './complement';
 import { initializeOffline } from './offline';
-import { readSound, saveMakeTenCompletion, saveSound } from './storage';
+import { readSound, saveComplementCompletion, saveSound } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T;
@@ -13,7 +12,7 @@ function element<T extends HTMLElement = HTMLElement>(id: string) {
 const title = element('title');
 const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
-const play = element<HTMLButtonElement>('play');
+const modes = element('modes');
 const home = element<HTMLButtonElement>('home');
 const sound = element<HTMLButtonElement>('sound');
 const hint = element<HTMLButtonElement>('hint');
@@ -26,23 +25,14 @@ const overflow = element('overflow');
 const first = element('first');
 const second = element('second');
 const effects = element('effects');
-const row = element('top-row');
-const board = row.parentElement!;
-const question = createQuestionSource();
-
-game.classList.add('make-ten');
-const cells = Array.from({ length: rowSize }, () => {
-  const cell = document.createElement('div');
-  row.append(cell);
-  return cell;
-});
+const board = element('board');
+const questions = new Map(totals.map(total => [total, createQuestionSource(total)]));
 const rainbow = document.createElement('div');
-rainbow.className = 'ten-block';
-rainbow.textContent = '10';
-rainbow.hidden = true;
-row.append(rainbow);
+rainbow.className = 'rainbow-block';
 
-let round: MakeTenRound | undefined;
+let cells: HTMLElement[] = [];
+let activeMode: HTMLButtonElement | undefined;
+let round: ComplementRound | undefined;
 let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
 let soundEnabled = readSound();
@@ -62,13 +52,13 @@ function clearHint() {
   cells.forEach(cell => cell.classList.remove('glow'));
 }
 
-function orangeBlock() {
+function makeBlock(color: 'orange' | 'blue') {
   const block = document.createElement('span');
-  block.className = 'block orange';
+  block.className = 'block ' + color;
   return block;
 }
 
-function makeChoice(current: MakeTenRound, quantity: number) {
+function makeNumberButton(quantity: number, color: 'orange' | 'blue') {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'choice';
@@ -80,9 +70,14 @@ function makeChoice(current: MakeTenRound, quantity: number) {
   const pieces = document.createElement('span');
   pieces.className = 'choice-pieces';
   pieces.setAttribute('aria-hidden', 'true');
-  const blocks = Array.from({ length: quantity }, orangeBlock);
+  const blocks = Array.from({ length: quantity }, () => makeBlock(color));
   pieces.append(...blocks);
   button.append(number, pieces);
+  return { button, blocks };
+}
+
+function makeChoice(current: ComplementRound, quantity: number) {
+  const { button, blocks } = makeNumberButton(quantity, 'orange');
   button.addEventListener('click', () => void choose(current, quantity, button, blocks));
   return button;
 }
@@ -94,12 +89,12 @@ function setInputEnabled(enabled: boolean) {
   });
 }
 
-function describeBoard(current: MakeTenRound) {
+function describeBoard(current: ComplementRound) {
   board.setAttribute('aria-label', `あお ${current.first}こ、あき ${current.answer}マス`);
 }
 
-function begin() {
-  const current = question(performance.now());
+function begin(total: Total) {
+  const current = questions.get(total)!(performance.now());
   round = current;
   phase = 'choosing';
 
@@ -120,12 +115,17 @@ function begin() {
   first.textContent = String(current.first);
   second.textContent = '?';
   second.classList.remove('solved');
-  element('answer').textContent = String(rowSize);
-  row.classList.remove('merged', 'flash');
+  element('answer').textContent = String(total);
+  game.style.setProperty('--rows', String(total / blocksPerRow));
+  board.classList.remove('merged', 'flash');
+  rainbow.textContent = String(total);
   rainbow.hidden = true;
-  cells.forEach((cell, index) => {
-    cell.className = index < current.first ? 'cell block blue' : 'cell';
+  cells = Array.from({ length: total }, (_, index) => {
+    const cell = document.createElement('span');
+    cell.className = index < current.first ? 'slot block blue' : 'slot';
+    return cell;
   });
+  board.replaceChildren(...cells, rainbow);
   describeBoard(current);
   const choices = current.choices.map(quantity => makeChoice(current, quantity));
   supply.replaceChildren(...choices);
@@ -133,7 +133,7 @@ function begin() {
   choices[0].focus({ preventScroll: true });
 }
 
-async function choose(current: MakeTenRound, quantity: number, button: HTMLButtonElement, blocks: HTMLElement[]) {
+async function choose(current: ComplementRound, quantity: number, button: HTMLButtonElement, blocks: HTMLElement[]) {
   if (round !== current || phase !== 'choosing') return;
 
   phase = 'animating';
@@ -154,11 +154,11 @@ async function choose(current: MakeTenRound, quantity: number, button: HTMLButto
   if (!correct) {
     const extra = quantity - current.answer;
     feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
-    overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, orangeBlock));
+    overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
     await new Promise<void>(resolve => window.setTimeout(resolve, 950));
     if (round !== current) return;
 
-    destinations.forEach(cell => { cell.className = 'cell'; });
+    destinations.forEach(cell => { cell.className = 'slot'; });
     button.classList.remove('chosen');
     feedback.textContent = '';
     overflow.replaceChildren();
@@ -168,15 +168,15 @@ async function choose(current: MakeTenRound, quantity: number, button: HTMLButto
   }
 
   playSound('place');
-  row.classList.add('flash');
+  board.classList.add('flash');
   await pause(155);
   if (round !== current) return;
 
-  row.classList.remove('flash');
-  row.classList.add('merged');
+  board.classList.remove('flash');
+  board.classList.add('merged');
   rainbow.hidden = false;
-  board.setAttribute('aria-label', 'にじの 10 が 1こ');
-  burst(effects, row, 12);
+  board.setAttribute('aria-label', `にじの ${current.total} が 1こ`);
+  burst(effects, board, 12);
   playSound('ten');
   await pause(280);
   if (round !== current) return;
@@ -184,7 +184,7 @@ async function choose(current: MakeTenRound, quantity: number, button: HTMLButto
   phase = 'complete';
   collected += 1;
   showScore();
-  saveMakeTenCompletion(current);
+  saveComplementCompletion(current);
   second.textContent = String(quantity);
   second.classList.add('solved');
   supply.hidden = true;
@@ -196,12 +196,18 @@ async function choose(current: MakeTenRound, quantity: number, button: HTMLButto
   next.focus({ preventScroll: true });
 }
 
-play.addEventListener('click', () => {
-  if (!game.hidden) return;
-  enableSound(soundEnabled);
-  collected = 0;
-  begin();
-});
+for (const total of totals) {
+  const { button } = makeNumberButton(total, 'blue');
+  button.setAttribute('aria-label', total + ' を つくる');
+  button.addEventListener('click', () => {
+    if (!game.hidden) return;
+    activeMode = button;
+    enableSound(soundEnabled);
+    collected = 0;
+    begin(total);
+  });
+  modes.append(button);
+}
 
 home.addEventListener('click', () => {
   round = undefined;
@@ -212,7 +218,7 @@ home.addEventListener('click', () => {
   home.hidden = true;
   score.hidden = true;
   title.hidden = false;
-  play.focus({ preventScroll: true });
+  activeMode?.focus({ preventScroll: true });
   applyOfflineUpdate?.();
 });
 
@@ -224,7 +230,7 @@ sound.addEventListener('click', () => {
 });
 
 next.addEventListener('click', () => {
-  if (round && phase === 'complete') begin();
+  if (round && phase === 'complete') begin(round.total);
 });
 
 hint.addEventListener('click', () => {

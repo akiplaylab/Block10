@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#83d7ff">
     <meta name="apple-mobile-web-app-title" content="ブロック 10">
-    <meta name="description" content="ブロックをあわせて、にじいろの10をつくろう。小学1年生向けの、やさしい足し算ゲーム。">
+    <meta name="description" content="ブロックをあわせて、にじいろの5・10・20をつくろう。小学1年生向けの、やさしい足し算ゲーム。">
     <meta property="og:title" content="ブロック 10">
-    <meta property="og:description" content="ブロックをあわせて、にじいろの10をつくろう。小学1年生向けの、やさしい足し算ゲーム。">
+    <meta property="og:description" content="ブロックをあわせて、にじいろの5・10・20をつくろう。小学1年生向けの、やさしい足し算ゲーム。">
     <meta property="og:type" content="website">
     <link rel="canonical" href="https://akiplaylab.github.io/block10/">
     <meta property="og:url" content="https://akiplaylab.github.io/block10/">
@@ -17,7 +17,7 @@
     <meta property="og:image:alt" content="青空と虹を背景に、青とオレンジのブロックと虹色の10が並ぶブロック 10のイラスト">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ブロック 10">
-    <meta name="twitter:description" content="ブロックをあわせて、にじいろの10をつくろう。小学1年生向けの、やさしい足し算ゲーム。">
+    <meta name="twitter:description" content="ブロックをあわせて、にじいろの5・10・20をつくろう。小学1年生向けの、やさしい足し算ゲーム。">
     <meta name="twitter:image" content="https://akiplaylab.github.io/block10/ogp.png">
     <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -43,20 +43,14 @@
         <h1 class="logo" aria-label="ブロック 10">
           <span aria-hidden="true">ブ</span><span aria-hidden="true">ロ</span><span aria-hidden="true">ッ</span><span aria-hidden="true">ク</span><strong aria-hidden="true">10</strong>
         </h1>
-        <div class="block-pile" aria-hidden="true">
-          <i class="block blue"></i><i class="block orange"></i><i class="block pink"></i>
-        </div>
-        <button id="play" class="primary" type="button"><span class="play-icon" aria-hidden="true"></span>あそぶ</button>
+        <div id="modes" class="modes" role="group" aria-label="つくる かずを えらぶ"></div>
         <p id="offline-ready" class="offline-ready" role="status" hidden>オフラインであそべます</p>
       </section>
-      <section id="game" class="game-screen" aria-label="ブロック 10" hidden>
+      <section id="game" class="game-screen complement" aria-label="ブロック 10" hidden>
         <div class="equation" aria-live="polite" aria-atomic="true">
           <span id="first"></span><span>+</span><span id="second"></span><span>=</span><span id="answer">?</span>
         </div>
-        <div class="board" role="img" aria-label="ブロックの盤面">
-          <div id="top-row" class="row" aria-hidden="true"></div>
-          <div id="bottom-row" class="row reserved" aria-hidden="true"></div>
-        </div>
+        <div id="board" class="board frame" role="img"></div>
         <div class="feedback">
           <p id="feedback" role="status"></p>
           <div id="overflow" class="overflow" aria-hidden="true"></div>
