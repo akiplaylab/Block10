@@ -186,7 +186,7 @@ function begin(total: number) {
     source = createQuestionSource(total);
     questions.set(total, source);
   }
-  const current = source(performance.now());
+  const current = source(performance.now(), answerMethod === 'choices');
   round = current;
   phase = 'choosing';
 

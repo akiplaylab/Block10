@@ -11,10 +11,11 @@ function shuffle<T>(values: readonly T[], random: () => number) {
 
 export function createQuestionSource(total: number, random = Math.random) {
   const quantities = Array.from({ length: total - 1 }, (_, index) => index + 1);
+  const numberChoices = total < 4 ? [1, 2, 3] : quantities;
   let deck: number[] = [];
   let previous: number | undefined;
 
-  return (startedAt: number) => {
+  return (startedAt: number, useNumberChoices = true) => {
     if (deck.length === 0) {
       deck = shuffle(quantities, random);
       if (deck.length > 1 && deck[0] === previous) {
@@ -26,8 +27,9 @@ export function createQuestionSource(total: number, random = Math.random) {
     const first = deck.shift()!;
     previous = first;
     const answer = total - first;
-    const fewer = shuffle(quantities.filter(quantity => quantity < answer), random);
-    const more = shuffle(quantities.filter(quantity => quantity > answer), random);
+    const candidates = useNumberChoices ? numberChoices : quantities;
+    const fewer = shuffle(candidates.filter(quantity => quantity < answer), random);
+    const more = shuffle(candidates.filter(quantity => quantity > answer), random);
     const distractors = fewer.length && more.length
       ? [fewer[0], more[0]]
       : [...fewer, ...more].slice(0, 2);

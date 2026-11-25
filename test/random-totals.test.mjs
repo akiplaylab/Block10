@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createQuestionSource } from '../src/complement.ts';
-import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, parseTotalSelection } from '../src/random-totals.ts';
+import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, parseTotalSelection, selectableTotals } from '../src/random-totals.ts';
 
 test('ランダム出題は各候補に同じ幅の乱数区間を割り当てる', () => {
   const candidates = defaultRandomTotals;
@@ -36,25 +36,34 @@ test('旧範囲設定は限定ランダムの保存値として扱わない', ()
   }
 });
 
-test('合計 2 を繰り返しても正の加数と選択肢が壊れない', () => {
+test('合計 2 の数字選択式でも 1、2、3 を表示する', () => {
   const question = createQuestionSource(2, () => 0);
   for (let index = 0; index < 5; index += 1) {
     const { first, answer, choices } = question(0);
-    assert.deepEqual([first, answer, choices], [1, 1, [1]]);
+    assert.deepEqual([first, answer], [1, 1]);
+    assert.deepEqual([...choices].sort(), [1, 2, 3]);
   }
 });
 
-test('合計 20 でも加数を重複なく出題し、選択肢を範囲内に保つ', () => {
-  const question = createQuestionSource(20, () => 0);
-  const seen = new Set();
-  for (let index = 0; index < 19; index += 1) {
-    const { first, answer, choices } = question(0);
-    assert.equal(first + answer, 20);
-    assert.ok(first > 0 && answer > 0);
-    assert.ok(choices.every(choice => choice >= 1 && choice <= 19));
-    assert.equal(new Set(choices).size, 3);
-    assert.ok(choices.includes(answer));
-    seen.add(first);
+test('ブロック方式と数字入力では従来の候補を使う', () => {
+  const question = createQuestionSource(2, () => 0);
+  assert.deepEqual(question(0, false).choices, [1]);
+});
+
+test('すべての合計で加数を重複なく出題し、異なる選択肢を 3 個表示する', () => {
+  for (const total of selectableTotals) {
+    const question = createQuestionSource(total, () => 0);
+    const seen = new Set();
+    for (let index = 0; index < total - 1; index += 1) {
+      const { first, answer, choices } = question(0);
+      assert.equal(first + answer, total);
+      assert.ok(first > 0 && answer > 0);
+      assert.ok(choices.every(choice => choice >= 1 && choice <= Math.max(3, total - 1)));
+      assert.equal(choices.length, 3);
+      assert.equal(new Set(choices).size, 3);
+      assert.equal(choices.filter(choice => choice === answer).length, 1);
+      seen.add(first);
+    }
+    assert.equal(seen.size, total - 1);
   }
-  assert.equal(seen.size, 19);
 });
