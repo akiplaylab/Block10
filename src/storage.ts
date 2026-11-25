@@ -1,6 +1,6 @@
 import type { Round } from './game';
 import type { ComplementRound } from './complement';
-import { defaultCustomTotals, defaultRandomTotals, parseRandomTotals, type CustomTotals, type RandomTotals } from './random-totals';
+import { defaultFavoriteTotals, defaultRandomTotals, mainTotal, parseTotalSelection } from './random-totals';
 
 type Completion = {
   problemIndex: number;
@@ -17,6 +17,7 @@ const storagePrefix = import.meta.env.MODE === 'pages-test'
 const soundKey = `${storagePrefix}.sound`;
 const historyKey = `${storagePrefix}.history`;
 const answerMethodKey = `${storagePrefix}.answerMethod`;
+const favoriteTotalsKey = `${storagePrefix}.favoriteTotals`;
 const randomTotalsKey = `${storagePrefix}.randomTotals`;
 
 export type AnswerMethod = 'blocks' | 'choices' | 'input';
@@ -42,20 +43,34 @@ export function saveAnswerMethod(method: AnswerMethod) {
   }
 }
 
-export function readRandomTotals(): { active: RandomTotals; custom: CustomTotals } {
+export function readFavoriteTotals() {
+  return readTotals(favoriteTotalsKey, defaultFavoriteTotals, mainTotal);
+}
+
+export function readRandomTotals() {
+  return readTotals(randomTotalsKey, defaultRandomTotals);
+}
+
+function readTotals(key: string, defaults: readonly number[], excluded?: number) {
   try {
-    const saved = JSON.parse(localStorage.getItem(randomTotalsKey) ?? 'null');
-    const active = parseRandomTotals(saved?.active ?? saved) ?? defaultRandomTotals;
-    const custom = parseRandomTotals(saved?.custom);
-    return { active, custom: active.preset === 'custom' ? active : custom?.preset === 'custom' ? custom : defaultCustomTotals };
+    const saved: unknown = JSON.parse(localStorage.getItem(key) ?? 'null');
+    return parseTotalSelection(saved, defaults.length, excluded) ?? [...defaults];
   } catch {
-    return { active: defaultRandomTotals, custom: defaultCustomTotals };
+    return [...defaults];
   }
 }
 
-export function saveRandomTotals(active: RandomTotals, custom: CustomTotals) {
+export function saveFavoriteTotals(totals: readonly number[]) {
+  saveTotals(favoriteTotalsKey, totals);
+}
+
+export function saveRandomTotals(totals: readonly number[]) {
+  saveTotals(randomTotalsKey, totals);
+}
+
+function saveTotals(key: string, totals: readonly number[]) {
   try {
-    localStorage.setItem(randomTotalsKey, JSON.stringify({ active, custom }));
+    localStorage.setItem(key, JSON.stringify(totals));
   } catch {
     return;
   }
