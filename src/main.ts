@@ -1,10 +1,10 @@
 import './style.css';
 import { enableSound, playSound } from './audio';
 import { burst, fly, flyNumber, pause } from './effects';
-import { blocksPerRow, createQuestionSource, type ComplementRound } from './complement';
+import { blocksPerRow, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
 import { drawTotal, mainTotal, selectableTotals } from './random-totals';
-import { isAnswerMethod, readAnswerMethod, readFavoriteTotals, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveRandomTotals, saveSound } from './storage';
+import { isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T;
@@ -14,6 +14,7 @@ const title = element('title');
 const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
+const operations = title.querySelectorAll<HTMLInputElement>('input[name="operation"]');
 const playTen = element<HTMLButtonElement>('play-ten');
 const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
@@ -42,6 +43,8 @@ let randomCandidates: number[] | undefined;
 let round: ComplementRound | undefined;
 let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
+let answered = 0;
+let operation = readOperation();
 let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
 const favoriteTotals = readFavoriteTotals();
@@ -54,7 +57,13 @@ function showSound() {
 }
 
 function showScore() {
-  score.textContent = `🌈 × ${collected}`;
+  element('correct-count').textContent = `🌈 × ${collected}`;
+  element('answer-count').textContent = `こたえた ${answered}かい`;
+}
+
+function showOperation() {
+  operations.forEach(option => { option.checked = option.value === operation; });
+  showFavorites();
 }
 
 function makeBlock(color: 'orange' | 'blue') {
@@ -168,7 +177,14 @@ function setInputEnabled(enabled: boolean) {
 }
 
 function describeBoard(current: ComplementRound) {
-  board.setAttribute('aria-label', `あお ${current.known}こ、あき ${current.answer}マス`);
+  board.setAttribute('aria-label', operation === 'subtraction'
+    ? `ブロック ${current.total}こ、あおを ${current.known}こ のこそう`
+    : `あお ${current.known}こ、あき ${current.answer}マス`);
+}
+
+function boardCellClass(current: ComplementRound, index: number) {
+  if (index < current.known) return 'slot block blue';
+  return operation === 'subtraction' ? 'slot block orange' : 'slot';
 }
 
 function begin(total: number) {
@@ -198,19 +214,21 @@ function begin(total: number) {
   next.hidden = true;
   result.hidden = true;
   supply.hidden = false;
-  first.textContent = String(current.known);
+  const terms = equationFor(current, operation);
+  first.textContent = String(terms.first);
+  element('operator').textContent = terms.symbol;
   second.textContent = '?';
   second.classList.remove('solved');
-  element('answer').textContent = String(total);
+  element('answer').textContent = String(terms.result);
   game.style.setProperty('--rows', String(Math.ceil(total / blocksPerRow)));
   board.dataset.total = String(total);
   board.classList.remove('merged', 'flash');
   equation.classList.remove('flash');
-  rainbow.textContent = String(total);
+  rainbow.textContent = String(terms.result);
   rainbow.hidden = true;
   cells = Array.from({ length: showBlocks ? total : 0 }, (_, index) => {
     const cell = document.createElement('span');
-    cell.className = index < current.known ? 'slot block blue' : 'slot';
+    cell.className = boardCellClass(current, index);
     return cell;
   });
   board.replaceChildren(...cells, rainbow);
@@ -223,11 +241,31 @@ function begin(total: number) {
     form.focus({ preventScroll: true });
     return;
   }
-  supply.setAttribute('aria-label', showBlocks ? 'おくブロック' : 'こたえの せんたくし');
+  supply.setAttribute('aria-label', showBlocks
+    ? operation === 'subtraction' ? 'とるブロック' : 'おくブロック'
+    : 'こたえの せんたくし');
   const choices = current.choices.map(quantity => makeChoice(current, quantity));
   supply.replaceChildren(...choices);
   setInputEnabled(true);
   choices[0].focus({ preventScroll: true });
+}
+
+async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[], correct: boolean) {
+  if (operation === 'subtraction') {
+    const removed = cells.slice(-blocks.length);
+    removed.forEach(cell => cell.classList.add('removed'));
+    await pause(210);
+    return () => removed.forEach(cell => cell.classList.remove('removed'));
+  }
+
+  const destinations = cells.slice(current.known, current.known + blocks.length);
+  const flyers = destinations.map((destination, index) => fly(effects, blocks[index], destination));
+  await pause(210);
+  flyers.forEach(flyer => flyer.remove());
+  if (round === current) {
+    destinations.forEach(cell => cell.classList.add('block', 'orange', correct ? 'land' : 'trial'));
+  }
+  return () => destinations.forEach(cell => { cell.className = 'slot'; });
 }
 
 async function choose(current: ComplementRound, quantity: number, control: HTMLElement, blocks: HTMLElement[] = []) {
@@ -237,31 +275,25 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   phase = 'animating';
   setInputEnabled(false);
   enableSound(soundEnabled);
-  const correct = quantity === current.answer;
-  current.attempts.push({ selected: quantity, correct });
-
-  const destinations = cells.slice(current.known, current.known + quantity);
-  const flyers = destinations.map((destination, index) => fly(effects, blocks[index], destination));
+  const correct = recordAttempt(current, quantity);
+  answered += 1;
+  showScore();
   control.classList.add('chosen');
-  if (blocks.length) {
-    await pause(210);
-    flyers.forEach(flyer => flyer.remove());
-    if (round !== current) return;
-  }
+  const restoreBlocks = blocks.length ? await showBlockAttempt(current, blocks, correct) : undefined;
+  if (round !== current) return;
 
-  destinations.forEach(cell => cell.classList.add('block', 'orange', correct ? 'land' : 'trial'));
   if (!correct) {
     playSound('incorrect');
     const extra = quantity - current.answer;
     feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
-    if (blocks.length) {
+    if (blocks.length && operation === 'addition') {
       overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
     }
     control.classList.add('shake');
     const timer = window.setTimeout(() => clearTrial?.(), 950);
     clearTrial = () => {
       window.clearTimeout(timer);
-      destinations.forEach(cell => { cell.className = 'slot'; });
+      restoreBlocks?.();
       control.classList.remove('chosen', 'shake');
       feedback.textContent = '';
       overflow.replaceChildren();
@@ -281,7 +313,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     board.classList.remove('flash');
     board.classList.add('merged');
     rainbow.hidden = false;
-    board.setAttribute('aria-label', `にじの ${current.total} が 1こ`);
+    board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
     burst(effects, board, 12);
   } else {
     const source = control.querySelector('output') ?? control;
@@ -300,7 +332,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   phase = 'complete';
   collected += 1;
   showScore();
-  saveComplementCompletion(current, !!randomCandidates);
+  saveComplementCompletion(current, operation, !!randomCandidates);
   if (blocks.length) {
     second.textContent = String(quantity);
     second.classList.add('solved');
@@ -318,6 +350,7 @@ function startMode(button: HTMLButtonElement, total: number, candidates?: number
   randomCandidates = candidates;
   enableSound(soundEnabled);
   collected = 0;
+  answered = 0;
   begin(total);
 }
 
@@ -343,7 +376,7 @@ function showFavorites() {
     const total = favoriteTotals[index];
     const { number, pieces } = makeNumberDisplay(total, 'blue');
     button.replaceChildren(number, pieces);
-    button.setAttribute('aria-label', total + ' を つくる');
+    button.setAttribute('aria-label', operation === 'subtraction' ? total + ' から ひく' : total + ' を つくる');
   });
 }
 
@@ -437,6 +470,14 @@ next.addEventListener('click', () => {
   if (round && phase === 'complete') begin(randomCandidates ? drawTotal(randomCandidates) : round.total);
 });
 
+operations.forEach(option => {
+  option.addEventListener('change', () => {
+    operation = option.value === 'subtraction' ? 'subtraction' : 'addition';
+    saveOperation(operation);
+    showOperation();
+  });
+});
+
 showSound();
-showFavorites();
+showOperation();
 showRandomMode();

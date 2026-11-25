@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createQuestionSource } from '../src/complement.ts';
-import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, parseTotalSelection } from '../src/random-totals.ts';
+import { createQuestionSource, equationFor, recordAttempt } from '../src/complement.ts';
+import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, parseTotalSelection, selectableTotals } from '../src/random-totals.ts';
 
 test('ランダム出題は各候補に同じ幅の乱数区間を割り当てる', () => {
   const candidates = defaultRandomTotals;
@@ -57,4 +57,26 @@ test('合計 20 でも加数を重複なく出題し、選択肢を範囲内に�
     seen.add(known);
   }
   assert.equal(seen.size, 19);
+});
+
+test('2〜20 の各組み合わせで足し算と引き算の第2項が一致し、誤答後も正解できる', () => {
+  for (const total of selectableTotals) {
+    const question = createQuestionSource(total, () => 0);
+    for (let index = 1; index < total; index += 1) {
+      const round = question(0);
+      const addition = equationFor(round, 'addition');
+      const subtraction = equationFor(round, 'subtraction');
+      assert.deepEqual(addition, { first: round.known, symbol: '+', result: total });
+      assert.deepEqual(subtraction, { first: total, symbol: '−', result: round.known });
+      assert.equal(addition.first + round.answer, addition.result);
+      assert.equal(subtraction.first - round.answer, subtraction.result);
+      assert.ok(round.choices.includes(round.answer));
+      assert.equal(recordAttempt(round, 0), false);
+      assert.equal(recordAttempt(round, round.answer), true);
+      assert.deepEqual(round.attempts, [
+        { selected: 0, correct: false },
+        { selected: round.answer, correct: true },
+      ]);
+    }
+  }
 });

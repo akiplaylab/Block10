@@ -1,4 +1,4 @@
-import type { ComplementRound } from './complement';
+import type { ComplementRound, Operation } from './complement';
 import { defaultFavoriteTotals, defaultRandomTotals, mainTotal, parseTotalSelection } from './random-totals';
 
 const preview = /\/test\/(pr-\d+)\/$/.exec(import.meta.env.BASE_URL)?.[1];
@@ -9,6 +9,23 @@ const soundKey = `${storagePrefix}.sound`;
 const answerMethodKey = `${storagePrefix}.answerMethod`;
 const favoriteTotalsKey = `${storagePrefix}.favoriteTotals`;
 const randomTotalsKey = `${storagePrefix}.randomTotals`;
+const operationKey = `${storagePrefix}.operation`;
+
+export function readOperation(): Operation {
+  try {
+    return localStorage.getItem(operationKey) === 'subtraction' ? 'subtraction' : 'addition';
+  } catch {
+    return 'addition';
+  }
+}
+
+export function saveOperation(operation: Operation) {
+  try {
+    localStorage.setItem(operationKey, operation);
+  } catch {
+    return;
+  }
+}
 
 export type AnswerMethod = 'blocks' | 'choices' | 'input';
 
@@ -82,14 +99,17 @@ export function saveSound(enabled: boolean) {
   }
 }
 
-export function saveComplementCompletion(round: ComplementRound, randomMode = false) {
+export function saveComplementCompletion(round: ComplementRound, operation: Operation, randomMode: boolean) {
   const mode = randomMode ? 'random' : round.total === 10 ? 'makeTen' : 'make' + round.total;
-  const key = `${storagePrefix}.${mode}.history`;
+  const key = operation === 'subtraction'
+    ? `${storagePrefix}.subtraction.${mode}.history`
+    : `${storagePrefix}.${mode}.history`;
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
     const history = Array.isArray(saved) ? saved : [];
     history.push({
       ...(randomMode ? { total: round.total } : {}),
+      operation,
       first: round.known,
       choices: round.choices,
       attempts: round.attempts,
