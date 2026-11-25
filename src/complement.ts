@@ -23,9 +23,9 @@ export function createQuestionSource(total: number, random = Math.random) {
       }
     }
 
-    const first = deck.shift()!;
-    previous = first;
-    const answer = total - first;
+    const known = deck.shift()!;
+    previous = known;
+    const answer = total - known;
     const fewer = shuffle(quantities.filter(quantity => quantity < answer), random);
     const more = shuffle(quantities.filter(quantity => quantity > answer), random);
     const distractors = fewer.length && more.length
@@ -34,7 +34,7 @@ export function createQuestionSource(total: number, random = Math.random) {
 
     return {
       total,
-      first,
+      known,
       answer,
       choices: shuffle([answer, ...distractors], random),
       attempts: [] as Attempt[],

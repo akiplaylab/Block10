@@ -1,20 +1,11 @@
-import type { Round } from './game';
 import type { ComplementRound } from './complement';
 import { defaultFavoriteTotals, defaultRandomTotals, mainTotal, parseTotalSelection } from './random-totals';
-
-type Completion = {
-  problemIndex: number;
-  addends: [number, number];
-  completedAt: string;
-  elapsedMs: number;
-};
 
 const preview = /\/test\/(pr-\d+)\/$/.exec(import.meta.env.BASE_URL)?.[1];
 const storagePrefix = import.meta.env.MODE === 'pages-test'
   ? ['block10.test', preview].filter(Boolean).join('.')
   : 'block10';
 const soundKey = `${storagePrefix}.sound`;
-const historyKey = `${storagePrefix}.history`;
 const answerMethodKey = `${storagePrefix}.answerMethod`;
 const favoriteTotalsKey = `${storagePrefix}.favoriteTotals`;
 const randomTotalsKey = `${storagePrefix}.randomTotals`;
@@ -91,22 +82,6 @@ export function saveSound(enabled: boolean) {
   }
 }
 
-export function saveCompletion(round: Round) {
-  try {
-    const saved: unknown = JSON.parse(localStorage.getItem(historyKey) ?? '[]');
-    const history: Completion[] = Array.isArray(saved) ? saved : [];
-    history.push({
-      problemIndex: round.index,
-      addends: [round.first, round.second],
-      completedAt: new Date().toISOString(),
-      elapsedMs: Math.round(performance.now() - round.startedAt),
-    });
-    localStorage.setItem(historyKey, JSON.stringify(history));
-  } catch {
-    return;
-  }
-}
-
 export function saveComplementCompletion(round: ComplementRound, randomMode = false) {
   const mode = randomMode ? 'random' : round.total === 10 ? 'makeTen' : 'make' + round.total;
   const key = `${storagePrefix}.${mode}.history`;
@@ -115,7 +90,7 @@ export function saveComplementCompletion(round: ComplementRound, randomMode = fa
     const history = Array.isArray(saved) ? saved : [];
     history.push({
       ...(randomMode ? { total: round.total } : {}),
-      first: round.first,
+      first: round.known,
       choices: round.choices,
       attempts: round.attempts,
       attemptCount: round.attempts.length,

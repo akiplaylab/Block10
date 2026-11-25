@@ -39,8 +39,8 @@ test('旧範囲設定は限定ランダムの保存値として扱わない', ()
 test('合計 2 を繰り返しても正の加数と選択肢が壊れない', () => {
   const question = createQuestionSource(2, () => 0);
   for (let index = 0; index < 5; index += 1) {
-    const { first, answer, choices } = question(0);
-    assert.deepEqual([first, answer, choices], [1, 1, [1]]);
+    const { known, answer, choices } = question(0);
+    assert.deepEqual([known, answer, choices], [1, 1, [1]]);
   }
 });
 
@@ -48,13 +48,13 @@ test('合計 20 でも加数を重複なく出題し、選択肢を範囲内に�
   const question = createQuestionSource(20, () => 0);
   const seen = new Set();
   for (let index = 0; index < 19; index += 1) {
-    const { first, answer, choices } = question(0);
-    assert.equal(first + answer, 20);
-    assert.ok(first > 0 && answer > 0);
+    const { known, answer, choices } = question(0);
+    assert.equal(known + answer, 20);
+    assert.ok(known > 0 && answer > 0);
     assert.ok(choices.every(choice => choice >= 1 && choice <= 19));
     assert.equal(new Set(choices).size, 3);
     assert.ok(choices.includes(answer));
-    seen.add(first);
+    seen.add(known);
   }
   assert.equal(seen.size, 19);
 });

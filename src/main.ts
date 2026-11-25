@@ -168,7 +168,7 @@ function setInputEnabled(enabled: boolean) {
 }
 
 function describeBoard(current: ComplementRound) {
-  board.setAttribute('aria-label', `あお ${current.first}こ、あき ${current.answer}マス`);
+  board.setAttribute('aria-label', `あお ${current.known}こ、あき ${current.answer}マス`);
 }
 
 function begin(total: number) {
@@ -198,7 +198,7 @@ function begin(total: number) {
   next.hidden = true;
   result.hidden = true;
   supply.hidden = false;
-  first.textContent = String(current.first);
+  first.textContent = String(current.known);
   second.textContent = '?';
   second.classList.remove('solved');
   element('answer').textContent = String(total);
@@ -210,7 +210,7 @@ function begin(total: number) {
   rainbow.hidden = true;
   cells = Array.from({ length: showBlocks ? total : 0 }, (_, index) => {
     const cell = document.createElement('span');
-    cell.className = index < current.first ? 'slot block blue' : 'slot';
+    cell.className = index < current.known ? 'slot block blue' : 'slot';
     return cell;
   });
   board.replaceChildren(...cells, rainbow);
@@ -240,7 +240,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   const correct = quantity === current.answer;
   current.attempts.push({ selected: quantity, correct });
 
-  const destinations = cells.slice(current.first, current.first + quantity);
+  const destinations = cells.slice(current.known, current.known + quantity);
   const flyers = destinations.map((destination, index) => fly(effects, blocks[index], destination));
   control.classList.add('chosen');
   if (blocks.length) {
