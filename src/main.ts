@@ -44,7 +44,6 @@ let randomCandidates: number[] | undefined;
 let round: ComplementRound | undefined;
 let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
-let answered = 0;
 let operation = readOperation();
 let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
@@ -58,8 +57,7 @@ function showSound() {
 }
 
 function showScore() {
-  element('correct-count').textContent = `🌈 × ${collected}`;
-  element('answer-count').textContent = `こたえた ${answered}かい`;
+  score.textContent = `🌈 × ${collected}`;
 }
 
 function showOperation() {
@@ -281,8 +279,6 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   setInputEnabled(false);
   enableSound(soundEnabled);
   const correct = recordAttempt(current, quantity);
-  answered += 1;
-  showScore();
   control.classList.add('chosen');
   const restoreBlocks = blocks.length ? await showBlockAttempt(current, blocks, correct) : undefined;
   if (round !== current) return;
@@ -355,7 +351,6 @@ function startMode(button: HTMLButtonElement, total: number, candidates?: number
   randomCandidates = candidates;
   enableSound(soundEnabled);
   collected = 0;
-  answered = 0;
   begin(total);
 }
 
