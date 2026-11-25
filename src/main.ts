@@ -158,6 +158,7 @@ async function choose(current: ComplementRound, quantity: number, button: HTMLBu
 
   destinations.forEach(cell => cell.classList.add('block', 'orange', correct ? 'land' : 'trial'));
   if (!correct) {
+    playSound('incorrect');
     const extra = quantity - current.answer;
     feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
     overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
