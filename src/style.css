@@ -411,7 +411,7 @@ main { position: relative; height: 100%; }
   :root { --viewport-unit: 1dvh; }
 }
 
-.modes, .complement {
+.modes, .ten-preview, .complement {
   --choice-piece: clamp(11px, min(3.8vw, calc(4.4 * var(--viewport-unit, 1vh))), 34px);
   --choice-gap: clamp(2px, .5vw, 5px);
   --choice-pad: clamp(5px, 1vw, 12px);
@@ -419,7 +419,7 @@ main { position: relative; height: 100%; }
   --choice-height: calc(var(--choice-number-size) + var(--rows) * (var(--choice-piece) + var(--choice-gap)) + 2 * var(--choice-pad) + 4px);
 }
 
-.modes, .complement .supply {
+.complement .supply {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(5px, 1.5vw, 16px);
@@ -430,9 +430,40 @@ main { position: relative; height: 100%; }
   box-shadow: none;
 }
 
+.main-mode, .other-modes {
+  display: grid;
+  justify-items: center;
+  gap: clamp(5px, 1.1vh, 12px);
+}
+
+.ten-preview {
+  --choice-piece: clamp(13px, min(5vw, 3.6vh), 30px);
+  --choice-number-size: clamp(38px, min(16vw, 8vh), 82px);
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2.5vw, 24px);
+  color: #234c94;
+}
+
+#play-ten {
+  min-width: min(57vw, 290px);
+  font-size: clamp(23px, 5vh, 42px);
+}
+
+.other-modes p {
+  margin: 0;
+  font-size: clamp(14px, 2.8vh, 21px);
+}
+
 .modes {
   --rows: 4;
-  --choice-piece: clamp(11px, min(3.8vw, calc(4.6 * var(--viewport-unit, 1vh))), 34px);
+  --choice-piece: clamp(8px, min(3.6vw, 2.15vh), 17px);
+  --choice-number-size: clamp(20px, min(7vw, 4.2vh), 35px);
+  --choice-pad: clamp(4px, .9vh, 9px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 16px);
+  width: min(74vw, 330px);
 }
 
 .modes .choice, .complement .supply .choice {
@@ -503,6 +534,10 @@ main { position: relative; height: 100%; }
   box-shadow: inset 0 2px 4px #587bae40, inset 0 0 0 1.5px #9ab4d780;
 }
 
+.frame[data-total="5"] .rainbow-block {
+  font-size: min(72px, calc(var(--cell) - 12px));
+}
+
 .frame.merged .slot { visibility: hidden; }
 .frame.flash .slot { animation: flash 155ms ease-in-out both; }
 .slot.trial { opacity: .76; }
@@ -546,6 +581,21 @@ main { position: relative; height: 100%; }
   .complement .feedback { grid-area: feedback; }
   .title-screen { padding-top: 55px; }
   .logo { font-size: min(14vw, calc(14 * var(--viewport-unit, 1vh)), 120px); }
+}
+
+@media (max-height: 420px) {
+  .title-screen { gap: 6px; }
+  .title-screen .logo { font-size: min(13vw, 11vh); }
+  .main-mode, .other-modes { gap: 4px; }
+  .ten-preview {
+    --choice-piece: 11px;
+    --choice-number-size: 32px;
+  }
+  .modes .choice {
+    --choice-gap: 2px;
+    --choice-pad: 4px;
+  }
+  #play-ten { min-height: 40px; }
 }
 
 .test-banner {

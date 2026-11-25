@@ -43,7 +43,14 @@
         <h1 class="logo" aria-label="ブロック 10">
           <span aria-hidden="true">ブ</span><span aria-hidden="true">ロ</span><span aria-hidden="true">ッ</span><span aria-hidden="true">ク</span><strong aria-hidden="true">10</strong>
         </h1>
-        <div id="modes" class="modes" role="group" aria-label="つくる かずを えらぶ"></div>
+        <div class="main-mode">
+          <div id="ten-preview" class="ten-preview" aria-hidden="true"></div>
+          <button id="play-ten" class="primary" type="button" aria-label="10 で あそぶ">あそぶ</button>
+        </div>
+        <div class="other-modes">
+          <p id="other-modes-label">ほかの かずで あそぶ</p>
+          <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label"></div>
+        </div>
         <p id="offline-ready" class="offline-ready" role="status" hidden>オフラインであそべます</p>
       </section>
       <section id="game" class="game-screen complement" aria-label="ブロック 10" hidden>

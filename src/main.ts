@@ -13,6 +13,7 @@ const title = element('title');
 const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
+const playTen = element<HTMLButtonElement>('play-ten');
 const home = element<HTMLButtonElement>('home');
 const sound = element<HTMLButtonElement>('sound');
 const hint = element<HTMLButtonElement>('hint');
@@ -58,12 +59,7 @@ function makeBlock(color: 'orange' | 'blue') {
   return block;
 }
 
-function makeNumberButton(quantity: number, color: 'orange' | 'blue') {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'choice';
-  button.setAttribute('aria-label', `${quantity}こ`);
-
+function makeNumberDisplay(quantity: number, color: 'orange' | 'blue') {
   const number = document.createElement('span');
   number.className = 'choice-number';
   number.textContent = String(quantity);
@@ -72,12 +68,21 @@ function makeNumberButton(quantity: number, color: 'orange' | 'blue') {
   pieces.setAttribute('aria-hidden', 'true');
   const blocks = Array.from({ length: quantity }, () => makeBlock(color));
   pieces.append(...blocks);
+  return { number, pieces, blocks };
+}
+
+function makeNumberButton(quantity: number, color: 'orange' | 'blue') {
+  const { number, pieces, blocks } = makeNumberDisplay(quantity, color);
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'choice';
   button.append(number, pieces);
   return { button, blocks };
 }
 
 function makeChoice(current: ComplementRound, quantity: number) {
   const { button, blocks } = makeNumberButton(quantity, 'orange');
+  button.setAttribute('aria-label', quantity + 'こ');
   button.addEventListener('click', () => void choose(current, quantity, button, blocks));
   return button;
 }
@@ -117,6 +122,7 @@ function begin(total: Total) {
   second.classList.remove('solved');
   element('answer').textContent = String(total);
   game.style.setProperty('--rows', String(total / blocksPerRow));
+  board.dataset.total = String(total);
   board.classList.remove('merged', 'flash');
   rainbow.textContent = String(total);
   rainbow.hidden = true;
@@ -196,9 +202,7 @@ async function choose(current: ComplementRound, quantity: number, button: HTMLBu
   next.focus({ preventScroll: true });
 }
 
-for (const total of totals) {
-  const { button } = makeNumberButton(total, 'blue');
-  button.setAttribute('aria-label', total + ' を つくる');
+function bindMode(button: HTMLButtonElement, total: Total) {
   button.addEventListener('click', () => {
     if (!game.hidden) return;
     activeMode = button;
@@ -206,6 +210,16 @@ for (const total of totals) {
     collected = 0;
     begin(total);
   });
+}
+
+const tenPreview = makeNumberDisplay(10, 'blue');
+element('ten-preview').append(tenPreview.number, tenPreview.pieces);
+bindMode(playTen, 10);
+for (const total of totals) {
+  if (total === 10) continue;
+  const { button } = makeNumberButton(total, 'blue');
+  button.setAttribute('aria-label', total + ' を つくる');
+  bindMode(button, total);
   modes.append(button);
 }
 
