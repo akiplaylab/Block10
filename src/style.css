@@ -543,6 +543,13 @@ main { position: relative; height: 100%; }
 .slot.trial { opacity: .76; }
 
 .choice.chosen .choice-pieces { opacity: 0; }
+.choice.shake { animation: shake 280ms ease-in-out; }
+
+@keyframes shake {
+  20%, 60% { translate: -5px; }
+  40%, 80% { translate: 5px; }
+}
+
 .choice[aria-disabled="true"], #hint[aria-disabled="true"] { cursor: default; }
 
 .feedback {

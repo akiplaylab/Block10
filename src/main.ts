@@ -38,6 +38,7 @@ let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
 let soundEnabled = readSound();
 let hintTimer: number | undefined;
+let clearTrial: (() => void) | undefined;
 
 function showSound() {
   sound.setAttribute('aria-pressed', String(soundEnabled));
@@ -99,6 +100,7 @@ function describeBoard(current: ComplementRound) {
 }
 
 function begin(total: Total) {
+  clearTrial?.();
   const current = questions.get(total)!(performance.now());
   round = current;
   phase = 'choosing';
@@ -142,6 +144,7 @@ function begin(total: Total) {
 async function choose(current: ComplementRound, quantity: number, button: HTMLButtonElement, blocks: HTMLElement[]) {
   if (round !== current || phase !== 'choosing') return;
 
+  clearTrial?.();
   phase = 'animating';
   clearHint();
   setInputEnabled(false);
@@ -162,13 +165,16 @@ async function choose(current: ComplementRound, quantity: number, button: HTMLBu
     const extra = quantity - current.answer;
     feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
     overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
-    await new Promise<void>(resolve => window.setTimeout(resolve, 950));
-    if (round !== current) return;
-
-    destinations.forEach(cell => { cell.className = 'slot'; });
-    button.classList.remove('chosen');
-    feedback.textContent = '';
-    overflow.replaceChildren();
+    button.classList.add('shake');
+    const timer = window.setTimeout(() => clearTrial?.(), 950);
+    clearTrial = () => {
+      window.clearTimeout(timer);
+      destinations.forEach(cell => { cell.className = 'slot'; });
+      button.classList.remove('chosen', 'shake');
+      feedback.textContent = '';
+      overflow.replaceChildren();
+      clearTrial = undefined;
+    };
     phase = 'choosing';
     setInputEnabled(true);
     return;
@@ -226,6 +232,7 @@ for (const total of totals) {
 
 home.addEventListener('click', () => {
   round = undefined;
+  clearTrial?.();
   clearHint();
   effects.replaceChildren();
   game.hidden = true;
