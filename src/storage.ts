@@ -9,7 +9,10 @@ type Completion = {
   elapsedMs: number;
 };
 
-const storagePrefix = import.meta.env.MODE === 'pages-test' ? 'block10.test' : 'block10';
+const preview = /\/test\/(pr-\d+)\/$/.exec(import.meta.env.BASE_URL)?.[1];
+const storagePrefix = import.meta.env.MODE === 'pages-test'
+  ? ['block10.test', preview].filter(Boolean).join('.')
+  : 'block10';
 const soundKey = `${storagePrefix}.sound`;
 const historyKey = `${storagePrefix}.history`;
 
