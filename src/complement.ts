@@ -2,7 +2,7 @@ export const blocksPerRow = 5;
 
 export type Operation = 'addition' | 'subtraction';
 
-export function equationFor({ total, known }: ComplementRound, operation: Operation) {
+export function equationFor({ total, known }: Pick<ComplementRound, 'total' | 'known'>, operation: Operation) {
   return operation === 'subtraction'
     ? { first: total, symbol: '−', result: known }
     : { first: known, symbol: '+', result: total };
