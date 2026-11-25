@@ -1,5 +1,5 @@
 import type { Round } from './game';
-import type { MakeTenRound } from './make-ten';
+import type { ComplementRound } from './complement';
 
 type Completion = {
   problemIndex: number;
@@ -49,8 +49,8 @@ export function saveCompletion(round: Round) {
   }
 }
 
-export function saveMakeTenCompletion(round: MakeTenRound) {
-  const key = `${storagePrefix}.makeTen.history`;
+export function saveComplementCompletion(round: ComplementRound) {
+  const key = `${storagePrefix}.${round.total === 10 ? 'makeTen' : 'make' + round.total}.history`;
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
     const history = Array.isArray(saved) ? saved : [];

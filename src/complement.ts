@@ -1,6 +1,6 @@
-import { rowSize } from './game';
-
-const quantities = Array.from({ length: rowSize - 1 }, (_, index) => index + 1);
+export const totals = [5, 10, 20] as const;
+export type Total = (typeof totals)[number];
+export const blocksPerRow = 5;
 
 function shuffle<T>(values: readonly T[], random: () => number) {
   const shuffled = [...values];
@@ -11,7 +11,8 @@ function shuffle<T>(values: readonly T[], random: () => number) {
   return shuffled;
 }
 
-export function createQuestionSource(random = Math.random) {
+export function createQuestionSource(total: Total, random = Math.random) {
+  const quantities = Array.from({ length: total - 1 }, (_, index) => index + 1);
   let deck: number[] = [];
   let previous: number | undefined;
 
@@ -26,7 +27,7 @@ export function createQuestionSource(random = Math.random) {
 
     const first = deck.shift()!;
     previous = first;
-    const answer = rowSize - first;
+    const answer = total - first;
     const fewer = shuffle(quantities.filter(quantity => quantity < answer), random);
     const more = shuffle(quantities.filter(quantity => quantity > answer), random);
     const distractors = fewer.length && more.length
@@ -34,6 +35,7 @@ export function createQuestionSource(random = Math.random) {
       : [...fewer, ...more].slice(0, 2);
 
     return {
+      total,
       first,
       answer,
       choices: shuffle([answer, ...distractors], random),
@@ -45,4 +47,4 @@ export function createQuestionSource(random = Math.random) {
 }
 
 type Attempt = { selected: number; correct: boolean };
-export type MakeTenRound = ReturnType<ReturnType<typeof createQuestionSource>>;
+export type ComplementRound = ReturnType<ReturnType<typeof createQuestionSource>>;
