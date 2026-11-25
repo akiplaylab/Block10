@@ -491,7 +491,6 @@ main { position: relative; height: 100%; }
   box-shadow: 0 0 0 2px var(--operation-ink), 0 4px 0 var(--operation-shadow);
 }
 .operations input:focus-visible + span { outline: 3px solid var(--operation-ink); outline-offset: 4px; }
-#answer-count { display: block; font-size: .6em; }
 
 .ten-preview {
   padding: .06em .45em;
