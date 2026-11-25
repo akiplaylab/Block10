@@ -1,5 +1,3 @@
-export const totals = [5, 10, 20] as const;
-export type Total = (typeof totals)[number];
 export const blocksPerRow = 5;
 
 function shuffle<T>(values: readonly T[], random: () => number) {

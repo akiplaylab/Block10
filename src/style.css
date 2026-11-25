@@ -509,9 +509,6 @@ main { position: relative; height: 100%; }
 }
 #random-chips span:nth-child(2) { background: linear-gradient(#eaf4ff, #b8d9ff); color: #234c94; box-shadow: 0 2px 0 #558cc366; }
 #random-chips span:nth-child(3) { background: linear-gradient(#faf1ff, #e1d0fb); color: #583891; box-shadow: 0 2px 0 #8463b366; }
-#random-summary { font-size: .71em; }
-#play-random:disabled { opacity: .65; cursor: default; }
-.other-modes .range-warning { max-width: 94vw; color: #72482f; font-size: .8rem; }
 
 .choice-number {
   font: 900 var(--choice-number-size) / 1 ui-rounded, system-ui, sans-serif;
@@ -674,31 +671,13 @@ body:has(#settings[open]) { touch-action: pan-y; }
 #settings form { margin-top: 10px; }
 #settings form[method="dialog"] { text-align: right; }
 
-#settings #random-settings { margin-top: 12px; }
-#random-settings p { margin: 0; font-size: .85rem; }
-.range-options {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 4px;
-  font-size: .85rem;
-}
-#random-kinds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.range-options span { grid-column: 1 / -1; }
-.range-options button {
-  min-height: 34px;
-  padding: 2px;
-  border: 1px solid #9ab4d7;
-  border-radius: 8px;
-  background: white;
-  color: #234c94;
-  font: inherit;
-}
-.range-options button[aria-pressed="true"] { background: #234c94; color: white; }
-.range-options button:disabled, #settings-close:disabled, #use-custom:disabled { opacity: .55; cursor: default; }
-#random-custom summary { padding-block: 4px; font-size: .85rem; cursor: pointer; }
-#random-settings input, #random-settings select {
+#settings .total-settings { margin-top: 12px; }
+.total-selectors { display: flex; gap: 8px; font-size: .85rem; }
+.total-selectors label { flex: 1; min-width: 0; }
+.total-selectors select {
+  display: block;
   width: 100%;
-  min-height: 38px;
+  min-height: 44px;
   padding: 4px 8px;
   border: 1px solid #9ab4d7;
   border-radius: 8px;
@@ -706,10 +685,6 @@ body:has(#settings[open]) { touch-action: pan-y; }
   color: inherit;
   font: inherit;
 }
-#random-custom-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: .85rem; }
-#random-candidates { font-size: .85rem; overflow-wrap: anywhere; }
-#use-custom { margin-top: 6px; }
-#random-error { color: #8c3c20; }
 
 .answer-option {
   display: grid;
