@@ -38,7 +38,6 @@ export function createQuestionSource(total: number, random = Math.random) {
       answer,
       choices: shuffle([answer, ...distractors], random),
       attempts: [] as Attempt[],
-      hintCount: 0,
       startedAt,
     };
   };

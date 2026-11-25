@@ -138,7 +138,6 @@ header {
 
 #home span { font-size: 1.45em; line-height: 1; }
 #settings-open { min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
-#hint span { color: #a42682; font-size: 1.23em; }
 .sound { margin-left: auto; min-width: 5.4em; }
 .speaker {
   width: 1.12em;
@@ -317,6 +316,7 @@ main { position: relative; height: 100%; }
 .supply button { width: var(--piece); height: var(--piece); }
 .supply button.used { visibility: hidden; }
 .actions { display: flex; align-items: center; justify-content: center; }
+.actions:has(#next[hidden]) { display: none; }
 .result {
   color: #b82b71;
   font-size: min(9vw, 7.4vh, 54px);
@@ -325,7 +325,6 @@ main { position: relative; height: 100%; }
 }
 .result span { color: #f5a51a; font-size: .75em; }
 
-.glow { animation: glow 550ms ease-in-out 3 alternate; }
 .flyer { transform-origin: top left; }
 .flyer { position: fixed; animation: fly 210ms cubic-bezier(.24,.78,.24,1) both; }
 .land { animation: pop 230ms ease-out both; }
@@ -351,10 +350,6 @@ main { position: relative; height: 100%; }
 @keyframes flash {
   50% { filter: brightness(1.48); box-shadow: 0 0 16px #fff495; }
 }
-@keyframes glow {
-  from { outline: 2px solid #e68e0c; outline-offset: 1px; }
-  to { outline: 3px solid #ffb300; outline-offset: 3px; box-shadow: 0 0 16px 5px #ffd343; }
-}
 @keyframes burst {
   from { transform: translate(-50%, -50%) scale(.25); opacity: 0; }
   22% { opacity: 1; }
@@ -377,7 +372,6 @@ main { position: relative; height: 100%; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; }
-  .glow { outline: 3px solid #ed9a00; outline-offset: 2px; }
 }
 
 @media (max-width: 520px) and (orientation: portrait) {
@@ -573,7 +567,7 @@ main { position: relative; height: 100%; }
   40%, 80% { translate: 5px; }
 }
 
-.choice[aria-disabled="true"], #hint[aria-disabled="true"] { cursor: default; }
+.choice[aria-disabled="true"] { cursor: default; }
 
 .feedback {
   display: flex;
@@ -721,8 +715,17 @@ body:has(#settings[open]) { touch-action: pan-y; }
 .complement[data-method="blocks"] { grid-template-areas: "equation" "board" "feedback" "turn" "actions"; }
 .complement[data-method="blocks"] .frame { grid-area: board; }
 
+.complement[data-method="blocks"]:has(#next[hidden]) {
+  grid-template-areas: "equation" "board" "feedback" "turn";
+  grid-template-rows: auto auto var(--feedback-height) var(--choice-height);
+}
+
 @media (orientation: landscape) and (max-height: 580px) {
   .complement[data-method="blocks"] { grid-template-areas: "equation actions" "board turn" "feedback feedback"; }
+  .complement[data-method="blocks"]:has(#next[hidden]) {
+    grid-template-areas: "equation equation" "board turn" "feedback feedback";
+    grid-template-rows: auto auto var(--feedback-height);
+  }
 }
 
 .complement[data-method="choices"] .choice {

@@ -6,7 +6,6 @@ type Completion = {
   problemIndex: number;
   addends: [number, number];
   completedAt: string;
-  hintCount: number;
   elapsedMs: number;
 };
 
@@ -100,7 +99,6 @@ export function saveCompletion(round: Round) {
       problemIndex: round.index,
       addends: [round.first, round.second],
       completedAt: new Date().toISOString(),
-      hintCount: round.hints,
       elapsedMs: Math.round(performance.now() - round.startedAt),
     });
     localStorage.setItem(historyKey, JSON.stringify(history));
@@ -121,7 +119,6 @@ export function saveComplementCompletion(round: ComplementRound, randomMode = fa
       choices: round.choices,
       attempts: round.attempts,
       attemptCount: round.attempts.length,
-      hintCount: round.hintCount,
       elapsedMs: Math.round(performance.now() - round.startedAt),
       completedAt: new Date().toISOString(),
     });

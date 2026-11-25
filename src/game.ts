@@ -7,7 +7,7 @@ export const rowSize = 10;
 
 export function startProblem(index: number, startedAt: number) {
   const [first, second] = problems[index];
-  return { index, first, second, placed: 0, hints: 0, startedAt };
+  return { index, first, second, placed: 0, startedAt };
 }
 
 export type Round = ReturnType<typeof startProblem>;
