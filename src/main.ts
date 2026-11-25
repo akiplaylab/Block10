@@ -152,6 +152,7 @@ async function choose(current: MakeTenRound, quantity: number, button: HTMLButto
 
   destinations.forEach(cell => cell.classList.add('block', 'orange', correct ? 'land' : 'trial'));
   if (!correct) {
+    playSound('incorrect');
     const extra = quantity - current.answer;
     feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
     overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, orangeBlock));
