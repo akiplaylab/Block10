@@ -3,7 +3,8 @@ import { enableSound, playSound } from './audio';
 import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, totals, type ComplementRound, type Total } from './complement';
 import { initializeOffline } from './offline';
-import { isAnswerMethod, readAnswerMethod, readSound, saveAnswerMethod, saveComplementCompletion, saveSound } from './storage';
+import { candidateTotals, configuredRange, defaultRandomTotals, drawTotal, minimumTotal, parseRandomTotals, randomKinds, randomMaximums, totalLimit, type RandomTotals, type StandardTotals } from './random-totals';
+import { isAnswerMethod, readAnswerMethod, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveRandomTotals, saveSound } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T;
@@ -14,10 +15,17 @@ const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
 const playTen = element<HTMLButtonElement>('play-ten');
+const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
 const settingsOpen = element<HTMLButtonElement>('settings-open');
 const settings = element<HTMLDialogElement>('settings');
 const answerOptions = settings.querySelectorAll<HTMLInputElement>('input[name="answer-method"]');
+const settingsClose = element<HTMLButtonElement>('settings-close');
+const randomCustom = element<HTMLDetailsElement>('random-custom');
+const randomMin = element<HTMLInputElement>('random-min');
+const randomMax = element<HTMLInputElement>('random-max');
+const randomStep = element<HTMLSelectElement>('random-step');
+const useCustom = element<HTMLButtonElement>('use-custom');
 const sound = element<HTMLButtonElement>('sound');
 const hint = element<HTMLButtonElement>('hint');
 const next = element<HTMLButtonElement>('next');
@@ -31,17 +39,21 @@ const second = element('second');
 const effects = element('effects');
 const board = element('board');
 const equation = game.querySelector<HTMLElement>('.equation')!;
-const questions = new Map(totals.map(total => [total, createQuestionSource(total)]));
+const questions = new Map<number, ReturnType<typeof createQuestionSource>>();
 const rainbow = document.createElement('div');
 rainbow.className = 'rainbow-block';
 
 let cells: HTMLElement[] = [];
 let activeMode: HTMLButtonElement | undefined;
+let randomCandidates: number[] | undefined;
 let round: ComplementRound | undefined;
 let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
 let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
+let { active: randomTotals, custom: customTotals } = readRandomTotals();
+let standardTotals = randomTotals.preset === 'standard' ? randomTotals : defaultRandomTotals;
+let customError = '';
 let hintTimer: number | undefined;
 let clearTrial: (() => void) | undefined;
 
@@ -179,9 +191,14 @@ function describeBoard(current: ComplementRound) {
   board.setAttribute('aria-label', `あお ${current.first}こ、あき ${current.answer}マス`);
 }
 
-function begin(total: Total) {
+function begin(total: number) {
   clearTrial?.();
-  const current = questions.get(total)!(performance.now());
+  let source = questions.get(total);
+  if (!source) {
+    source = createQuestionSource(total);
+    questions.set(total, source);
+  }
+  const current = source(performance.now());
   round = current;
   phase = 'choosing';
 
@@ -207,7 +224,7 @@ function begin(total: Total) {
   second.textContent = '?';
   second.classList.remove('solved');
   element('answer').textContent = String(total);
-  game.style.setProperty('--rows', String(total / blocksPerRow));
+  game.style.setProperty('--rows', String(Math.ceil(total / blocksPerRow)));
   board.dataset.total = String(total);
   board.classList.remove('merged', 'flash');
   equation.classList.remove('flash');
@@ -306,7 +323,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   phase = 'complete';
   collected += 1;
   showScore();
-  saveComplementCompletion(current);
+  saveComplementCompletion(current, !!randomCandidates);
   if (blocks.length) {
     second.textContent = String(quantity);
     second.classList.add('solved');
@@ -320,13 +337,17 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   next.focus({ preventScroll: true });
 }
 
+function startMode(button: HTMLButtonElement, total: number, candidates?: number[]) {
+  activeMode = button;
+  randomCandidates = candidates;
+  enableSound(soundEnabled);
+  collected = 0;
+  begin(total);
+}
+
 function bindMode(button: HTMLButtonElement, total: Total) {
   button.addEventListener('click', () => {
-    if (!game.hidden) return;
-    activeMode = button;
-    enableSound(soundEnabled);
-    collected = 0;
-    begin(total);
+    if (game.hidden) startMode(button, total);
   });
 }
 
@@ -338,8 +359,136 @@ for (const total of totals) {
   const { button } = makeNumberButton(total, 'blue');
   button.setAttribute('aria-label', total + ' を つくる');
   bindMode(button, total);
-  modes.append(button);
+  modes.insertBefore(button, playRandom);
 }
+
+function rangeWarning(config: RandomTotals) {
+  const limit = totalLimit(answerMethod);
+  return configuredRange(config).max > limit
+    ? `この回答方法では ${limit} までです。出題範囲を設定し直してください。`
+    : '';
+}
+
+function showRandomMode() {
+  const range = configuredRange(randomTotals);
+  const candidates = candidateTotals(range);
+  const summary = candidates.length === 1
+    ? String(candidates[0])
+    : `${candidates[0]}～${candidates[candidates.length - 1]}${range.step === 1 ? '' : `（${range.step}ずつ）`}`;
+  element('random-summary').textContent = summary;
+  const chipValues = candidates.length <= 3 ? candidates : [
+    candidates[0],
+    candidates[Math.floor((candidates.length - 1) / 2)],
+    candidates[candidates.length - 1],
+  ];
+  element('random-chips').replaceChildren(...chipValues.map(value => {
+    const chip = document.createElement('span');
+    chip.textContent = String(value);
+    return chip;
+  }));
+  const warning = element('random-warning');
+  warning.textContent = rangeWarning(randomTotals);
+  warning.hidden = !warning.textContent;
+  playRandom.disabled = !warning.hidden;
+}
+
+playRandom.addEventListener('click', () => {
+  if (!game.hidden || rangeWarning(randomTotals)) return;
+  const candidates = candidateTotals(configuredRange(randomTotals));
+  if (candidates.length) startMode(playRandom, drawTotal(candidates), candidates);
+});
+
+function readRangeDraft() {
+  return parseRandomTotals({
+    preset: 'custom',
+    min: randomMin.valueAsNumber,
+    max: randomMax.valueAsNumber,
+    step: Number(randomStep.value),
+  });
+}
+
+function writeRangeDraft() {
+  randomMin.value = String(customTotals.min);
+  randomMax.value = String(customTotals.max);
+  randomStep.value = String(customTotals.step);
+}
+
+function applyRandomTotals(config: RandomTotals) {
+  randomTotals = config;
+  customError = '';
+  if (config.preset === 'standard') {
+    standardTotals = config;
+    writeRangeDraft();
+  } else {
+    customTotals = config;
+  }
+  saveRandomTotals(randomTotals, customTotals);
+  showRandomMode();
+  showRangeSettings();
+}
+
+function applyCustomDraft() {
+  const config = readRangeDraft();
+  customError = config
+    ? rangeWarning(config)
+    : '最小値・最大値には 2 ～ 100 の整数を入れ、最小値を最大値以下にしてください。';
+  if (config && !customError) applyRandomTotals(config);
+  else showRangeSettings();
+}
+
+function addRangeOption(group: string, label: string, change: Partial<StandardTotals>) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  const selection = () => ({ ...standardTotals, ...change });
+  button.addEventListener('click', () => applyRandomTotals(selection()));
+  element(group).append(button);
+  return (pressed: boolean) => {
+    const config = selection();
+    const unavailable = rangeWarning(config);
+    const empty = !candidateTotals(configuredRange(config)).length;
+    button.disabled = !!unavailable || empty;
+    button.setAttribute('aria-pressed', String(pressed));
+    button.title = unavailable || (empty ? '出題候補がありません。' : '');
+  };
+}
+
+const maxOptions = randomMaximums.map(max => {
+  const update = addRangeOption('random-maximums', String(max), { max });
+  return () => update(standardTotals.max === max);
+});
+const kindOptions = (Object.keys(randomKinds) as (keyof typeof randomKinds)[]).map(kind => {
+  const update = addRangeOption('random-kinds', randomKinds[kind], { kind });
+  return () => update(standardTotals.kind === kind);
+});
+
+function showRangeSettings() {
+  maxOptions.forEach(update => update());
+  kindOptions.forEach(update => update());
+  const limit = totalLimit(answerMethod);
+  element('random-limit').textContent = `この回答方法で使える範囲は ${minimumTotal} ～ ${limit} です。`;
+  const candidates = candidateTotals(configuredRange(randomTotals));
+  const summary = candidates.length <= 5
+    ? candidates.join('、')
+    : `${candidates.slice(0, 3).join('、')} … ${candidates[candidates.length - 1]}（${candidates.length} 件）`;
+  const mode = randomTotals.preset === 'standard' ? '通常' : 'カスタム';
+  element('random-candidates').textContent = `適用中（${mode}） ${summary}`;
+  const error = element('random-error');
+  error.textContent = customError || rangeWarning(randomTotals);
+  error.hidden = !error.textContent;
+  settingsClose.disabled = !error.hidden;
+  const draft = readRangeDraft();
+  useCustom.disabled = !draft || !!rangeWarning(draft) || (randomTotals.preset === 'custom' && !customError);
+}
+
+randomCustom.addEventListener('input', applyCustomDraft);
+useCustom.addEventListener('click', applyCustomDraft);
+settings.addEventListener('cancel', event => {
+  if (settingsClose.disabled) event.preventDefault();
+});
+settingsClose.form?.addEventListener('submit', event => {
+  if (settingsClose.disabled) event.preventDefault();
+});
 
 home.addEventListener('click', () => {
   round = undefined;
@@ -358,6 +507,9 @@ home.addEventListener('click', () => {
 
 settingsOpen.addEventListener('click', () => {
   answerOptions.forEach(option => { option.checked = option.value === answerMethod; });
+  randomCustom.open = false;
+  writeRangeDraft();
+  showRangeSettings();
   settings.showModal();
   settings.querySelector<HTMLInputElement>('input:checked')?.focus();
 });
@@ -367,6 +519,9 @@ settings.addEventListener('change', event => {
   if (option instanceof HTMLInputElement && option.checked && isAnswerMethod(option.value)) {
     answerMethod = option.value;
     saveAnswerMethod(answerMethod);
+    if (customError) applyCustomDraft();
+    else showRangeSettings();
+    showRandomMode();
   }
 });
 
@@ -378,7 +533,7 @@ sound.addEventListener('click', () => {
 });
 
 next.addEventListener('click', () => {
-  if (round && phase === 'complete') begin(round.total);
+  if (round && phase === 'complete') begin(randomCandidates ? drawTotal(randomCandidates) : round.total);
 });
 
 hint.addEventListener('click', () => {
@@ -390,3 +545,4 @@ hint.addEventListener('click', () => {
 });
 
 showSound();
+showRandomMode();

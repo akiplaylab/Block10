@@ -55,7 +55,14 @@
         </div>
         <div class="other-modes">
           <p id="other-modes-label">ほかの かずで あそぶ</p>
-          <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label"></div>
+          <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label">
+            <button id="play-random" class="choice" type="button" aria-describedby="random-warning">
+              <span>ランダム</span>
+              <span id="random-chips" aria-hidden="true"></span>
+              <span id="random-summary"></span>
+            </button>
+          </div>
+          <p id="random-warning" class="range-warning" role="status" hidden></p>
         </div>
         <p id="offline-ready" class="offline-ready" role="status" hidden>オフラインであそべます</p>
       </section>
@@ -108,7 +115,34 @@
           </span>
         </label>
       </fieldset>
-      <form method="dialog"><button class="utility" type="submit">とじる</button></form>
+      <fieldset id="random-settings">
+          <legend>ランダム出題</legend>
+          <p id="random-limit"></p>
+          <div id="random-maximums" class="range-options" role="group" aria-label="いくつまで？">
+            <span>いくつまで？</span>
+          </div>
+          <div id="random-kinds" class="range-options" role="group" aria-label="どんな数？">
+            <span>どんな数？</span>
+          </div>
+          <details id="random-custom">
+            <summary>カスタム</summary>
+            <div id="random-custom-fields">
+              <label>最小値 <input id="random-min" type="number" inputmode="numeric" min="2" max="100" required></label>
+              <label>最大値 <input id="random-max" type="number" inputmode="numeric" min="2" max="100" required></label>
+              <label>間隔
+                <select id="random-step">
+                  <option value="1">1</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                </select>
+              </label>
+            </div>
+            <button id="use-custom" class="utility" type="button">カスタムを使う</button>
+          </details>
+          <output id="random-candidates" role="status"></output>
+          <p id="random-error" class="range-warning" role="status" hidden></p>
+      </fieldset>
+      <form method="dialog"><button id="settings-close" class="utility" type="submit">とじる</button></form>
     </dialog>
     <div id="effects" aria-hidden="true"></div>
     <script type="module" src="/src/main.ts"></script>
