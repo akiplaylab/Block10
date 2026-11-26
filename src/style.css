@@ -761,16 +761,6 @@ body:has(#total-editor[open]) .mode-card.editing {
   pointer-events: none;
 }
 
-.offline-ready {
-  position: absolute;
-  inset-inline-start: max(0.5rem, env(safe-area-inset-left));
-  bottom: max(0.5rem, env(safe-area-inset-bottom));
-  margin: 0;
-  color: #334155;
-  font: 600 0.75rem / 1.4 system-ui, sans-serif;
-  pointer-events: none;
-}
-
 .settings-dialog {
   width: min(calc(100% - 24px), 420px);
   max-height: calc(100% - 24px);
@@ -802,6 +792,12 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
   font: inherit;
   font-size: .85rem;
   text-decoration: underline;
+}
+
+.offline-ready {
+  margin: 4px 4px 0;
+  color: #425a80;
+  font-size: .75rem;
 }
 
 .editor-numbers {
