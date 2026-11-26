@@ -1,3 +1,4 @@
+import { browserLanguage, isLanguage, type Language } from './i18n';
 import type { ComplementRound, Operation } from './complement';
 import { defaultFavoriteTotals, defaultRandomTotals, mainTotal, parseRandomTotals, parseTotalSelection } from './random-totals';
 
@@ -10,6 +11,25 @@ const answerMethodKey = `${storagePrefix}.answerMethod`;
 const favoriteTotalsKey = `${storagePrefix}.favoriteTotals`;
 const randomTotalsKey = `${storagePrefix}.randomTotals`;
 const operationKey = `${storagePrefix}.operation`;
+
+const languageKey = `${storagePrefix}.language`;
+
+export function readLanguage(): Language {
+  try {
+    const saved = localStorage.getItem(languageKey);
+    if (isLanguage(saved)) return saved;
+  } catch {
+  }
+  return browserLanguage(navigator.language);
+}
+
+export function saveLanguage(language: Language) {
+  try {
+    localStorage.setItem(languageKey, language);
+  } catch {
+    return;
+  }
+}
 
 export const defaultOperation: Operation = 'addition';
 

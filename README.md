@@ -1,20 +1,22 @@
-# ブロック 10
+# Block 10
 
-ブロック 10 は、数の組み合わせを楽しく学び、計算力の土台をつくる足し算・引き算ゲームです。
+[English](README.md) | [日本語](README.ja.md)
 
-[![ブロック10であそぶ。虹の下に「7 + ? = 10」の式と青7個・オレンジ3個のブロック](public/ogp.png)](https://akiplaylab.github.io/block10/)
+Block 10 is an addition and subtraction game that helps kids build number skills through play.
 
-**[ブロック 10 であそぶ](https://akiplaylab.github.io/block10/)**
+[![Play Block 10. Under a rainbow, 7 + ? = 10 appears above seven blue blocks and three orange blocks.](public/ogp.en.png)](https://akiplaylab.github.io/block10/)
 
-## ドキュメント
+**[Play Block 10](https://akiplaylab.github.io/block10/)**
 
-- [教育理念](docs/Philosophy.md)
-- [利用ガイド](docs/UserGuide.md)
-- [仕様書](docs/Specification.md)
-- [開発ガイド](docs/Development.md)
+## Documentation
 
-## ライセンス
+- [Educational philosophy](docs/Philosophy.md)
+- [User guide](docs/UserGuide.md)
+- [Specification (Japanese)](docs/Specification.md)
+- [Development guide (Japanese)](docs/Development.md)
 
-Block10 は [MIT License](LICENSE) のもとで公開されています。
+## License
 
-配布物に含まれる Vite のポリフィルの著作権表示とライセンスは [第三者ライセンス通知](public/THIRD-PARTY-NOTICES.txt) に記載しています。
+Block10 is released under the [MIT License](LICENSE).
+
+The copyright and license for the Vite polyfill included in the distribution are listed in the [third-party notices](public/THIRD-PARTY-NOTICES.txt).

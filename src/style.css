@@ -159,7 +159,7 @@ header {
   font-size: clamp(14px, 2.2vw, 19px);
 }
 
-#home span { font-size: 1.45em; line-height: 1; }
+#home [aria-hidden="true"] { font-size: 1.45em; line-height: 1; }
 #settings-open { margin-left: auto; min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
 .sound { min-width: 5.4em; margin-bottom: 12px; }
 .speaker {
@@ -346,7 +346,7 @@ main { position: relative; height: 100%; }
   text-shadow: 0 2px 0 white, 0 0 9px white;
   animation: pop 360ms ease-out both;
 }
-.result span { color: #f5a51a; font-size: .75em; }
+.result [aria-hidden="true"] { color: #f5a51a; font-size: .75em; }
 
 .flyer {
   --flight-duration: 210ms;
@@ -811,6 +811,25 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 #settings legend { margin-bottom: 6px; font-size: .95rem; }
 .settings-dialog form { margin-top: 10px; }
 .settings-dialog form[method="dialog"] { text-align: right; }
+
+.language-setting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: .95rem;
+}
+
+.language-setting select {
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 2px solid #d8e9fa;
+  border-radius: 12px;
+  background: white;
+  color: inherit;
+  font: inherit;
+}
 
 #reset-open {
   display: block;

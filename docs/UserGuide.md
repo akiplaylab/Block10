@@ -1,28 +1,32 @@
-# 利用ガイド
+# User guide
 
-## 遊び方
+[English](UserGuide.md) | [日本語](UserGuide.ja.md)
 
-[ブロック 10 を開き](https://akiplaylab.github.io/block10/)、「あそぶ」を押すと 10 を使った問題が始まります。「ほかの かずで あそぶ」では、好きな数のカードや「ランダム」を選べます。
+## How to play
 
-式の「?」に入る数を答えます。たとえば `7 + ? = 10` では 7 にいくつ足すと 10 になるか、`10 − ? = 7` では 10 からいくつ取ると 7 が残るかを考えます。
+[Open Block 10](https://akiplaylab.github.io/block10/) and press **Play** to start with 10. Under **Play with other numbers**, choose a favorite number card or **Random**.
 
-- **ブロックつき**。足す、または取るブロックの数を選びます。
-- **数字をえらぶ**。答えの数字を選びます。
-- **数字を入力する**。画面の数字ボタンで答えを入力します。正解すると自動で次の問題に進みます。
+Find the number that goes in the **?**. In `7 + ? = 10`, work out how many to add to 7 to make 10. In `10 − ? = 7`, work out how many to take away from 10 to leave 7.
 
-間違えても同じ問題にもう一度答えられます。「つぎへ」が表示されたら、押すと次の問題に進みます。遊び方を選び直すには「ホーム」を押します。
+- **Use blocks** lets you pick how many blocks to add or take away.
+- **Pick a number** lets you choose the answer.
+- **Type a number** lets you enter the answer using the number buttons on the screen. A correct answer takes you straight to the next problem.
 
-## 設定
+If you make a mistake, you can try the same problem again. Press **Next** when it appears to move on. Press **Home** to choose another way to play.
 
-歯車ボタンから「せってい」を開きます。タイトル画面では「けいさん」で「たしざん」か「ひきざん」を選べます。「こたえかた」と音のオン・オフは、プレイ中にも変更できます。
+## Settings
 
-好きな数やランダムの候補を変えるには、タイトル画面で各カードの編集ボタンを押します。ランダムの候補は 1〜3 個選べます。
+Press the gear button to open **Settings**. On the home screen, choose **Add** or **Subtract** under **Math**. You can change **How to answer** and turn sound on or off while playing.
 
-タイトル画面の「せってい」で「はじめの せっていに もどす」を選ぶと、設定を初期状態に戻せます。遊んだ記録は残ります。
+Under **Language**, choose **English** or **日本語**. Your choice takes effect right away and is remembered next time. On your first visit, Block 10 uses Japanese if your browser language is Japanese and English otherwise.
 
-## インストールとオフライン利用
+To change a favorite number or the numbers used in **Random**, press the edit button on its card on the home screen. You can choose one to three numbers for **Random**.
 
-- iPad・iPhone では Safari の共有メニューから「ホーム画面に追加」を選びます。「Webアプリとして開く」が表示される場合はオンにします。
-- Windows では Microsoft Edge の「アプリ」から「このサイトをアプリとしてインストール」を選びます。
+Choose **Reset settings** from **Settings** on the home screen to restore the game settings. Your play history and choice of language are kept.
 
-オフラインで遊ぶには、インターネットにつないで一度起動します。「せってい」の下に「ブロック10は」「インターネットが なくても あそべます」と表示されたら準備完了です。
+## Installation and offline play
+
+- On iPad or iPhone, open the Share menu in Safari and choose **Add to Home Screen**. If **Open as Web App** appears, turn it on.
+- On Windows, choose **Apps** and then **Install this site as an app** in Microsoft Edge.
+
+To play offline, open Block 10 once while connected to the internet. When **You can play Block 10 offline** appears in **Settings**, you can play in either language without an internet connection.
