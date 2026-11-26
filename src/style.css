@@ -177,7 +177,7 @@ main { position: relative; height: 100%; }
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: clamp(10px, 3vh, 31px);
+  gap: clamp(8px, 2vh, 18px);
   padding: 34px 10px 12px;
 }
 
@@ -382,7 +382,6 @@ main { position: relative; height: 100%; }
 
 @media (orientation: portrait) {
   .sky-rainbow { width: 140vw; top: 42%; }
-  .title-screen { gap: min(6vh, 46px); }
   .game-screen { row-gap: min(4vh, 28px); }
   .turn { --piece: min(8.5vw, 72px); }
 }
@@ -531,6 +530,28 @@ main { position: relative; height: 100%; }
   box-shadow: 0 4px 0 var(--operation-shadow);
   font: 950 clamp(28px, min(10vw, 6.8vh), 64px) / 1.1 system-ui, sans-serif;
   white-space: nowrap;
+}
+
+#ten-blocks {
+  --preview-cell: clamp(23px, min(10vw, 5.6vh), 52px);
+  display: grid;
+  grid-template-columns: repeat(5, var(--preview-cell));
+  gap: clamp(3px, .7vh, 6px);
+  padding: clamp(4px, 1vh, 8px);
+  border: 2px solid white;
+  border-radius: 14px;
+  background: #f5fbffeb;
+  box-shadow: 0 3px 0 var(--operation-shadow);
+}
+
+#ten-blocks .block { aspect-ratio: 1; }
+
+body[data-operation="subtraction"] #ten-blocks .orange::after {
+  content: "";
+  position: absolute;
+  inset: 44% 25%;
+  border-radius: 999px;
+  background: #793a0e;
 }
 
 #play-ten {
@@ -726,9 +747,9 @@ body:has(#total-editor[open]) .mode-card.editing {
   .logo { font-size: min(14vw, calc(14 * var(--viewport-unit, 1vh)), 120px); }
 }
 
-@media (max-height: 420px) {
+@media (max-height: 500px) {
   .title-screen { gap: 6px; }
-  .title-screen .logo { font-size: min(13vw, 11vh); }
+  .title-screen .logo { font-size: min(13vw, 9vh); }
   .main-mode, .other-modes { gap: 4px; }
   .modes .choice {
     --choice-gap: 2px;
@@ -737,7 +758,7 @@ body:has(#total-editor[open]) .mode-card.editing {
   #play-ten { min-height: 40px; }
 }
 
-@media (max-height: 420px) and (orientation: landscape) {
+@media (orientation: landscape) {
   .title-screen {
     grid-template-columns: auto auto;
     align-items: center;

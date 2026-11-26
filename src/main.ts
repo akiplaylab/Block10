@@ -16,6 +16,7 @@ const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
 const operations = title.querySelectorAll<HTMLInputElement>('input[name="operation"]');
+const tenBlocks = element('ten-blocks');
 const playTen = element<HTMLButtonElement>('play-ten');
 const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
@@ -68,10 +69,17 @@ function showScore() {
 function showOperation() {
   operations.forEach(option => { option.checked = option.value === operation; });
   document.body.dataset.operation = operation;
-  const { first, symbol, result } = equationFor({ total: mainTotal, known: 7 }, operation);
+  const known = 7;
+  const missing = mainTotal - known;
+  const { first, symbol, result } = equationFor({ total: mainTotal, known }, operation);
   element('preview-first').textContent = String(first);
   renderOperator(element('preview-operator'), symbol);
   element('preview-result').textContent = String(result);
+  tenBlocks.replaceChildren(...Array.from({ length: mainTotal }, (_, index) =>
+    makeBlock(index < known ? 'blue' : 'orange')));
+  tenBlocks.setAttribute('aria-label', operation === 'subtraction'
+    ? `あお ${known}こを のこす、オレンジ ${missing}こを とる`
+    : `あお ${known}こに オレンジ ${missing}こを たす`);
   playTen.setAttribute('aria-label', operation === 'subtraction' ? `${mainTotal} から ひく` : `${mainTotal} を つくる`);
   showFavorites();
 }
