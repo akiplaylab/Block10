@@ -40,11 +40,15 @@ export function pagesOffline(test: boolean): Plugin {
         display: 'standalone',
         theme_color: '#83d7ff',
         background_color: '#83d7ff',
-        icons: [192, 512].map(size => ({
-          src: `pwa-${size}.png`,
-          sizes: `${size}x${size}`,
-          type: 'image/png',
-        })),
+        icons: [
+          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          ...[192, 512].map(size => ({
+            src: `icon-${size}.png`,
+            sizes: `${size}x${size}`,
+            type: 'image/png',
+            purpose: 'any',
+          })),
+        ],
       }, null, 2));
 
       const paths = (await readdir(directory, { recursive: true, withFileTypes: true }))
