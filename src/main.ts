@@ -21,8 +21,10 @@ const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
 const settingsOpen = element<HTMLButtonElement>('settings-open');
 const settings = element<HTMLDialogElement>('settings');
+const operationSettings = element<HTMLFieldSetElement>('operation-settings');
 const operations = settings.querySelectorAll<HTMLInputElement>('input[name="operation"]');
 const answerOptions = settings.querySelectorAll<HTMLInputElement>('input[name="answer-method"]');
+const resetOpen = element<HTMLButtonElement>('reset-open');
 const resetSettings = element<HTMLDialogElement>('reset-settings');
 const editor = element<HTMLDialogElement>('total-editor');
 const editorNumbers = element('editor-numbers');
@@ -51,7 +53,6 @@ let round: ComplementRound | undefined;
 let phase: 'choosing' | 'animating' | 'complete' = 'choosing';
 let collected = 0;
 let operation = readOperation();
-let roundOperation = operation;
 let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
 let favoriteTotals = readFavoriteTotals();
@@ -69,7 +70,7 @@ function showScore() {
 
 function showOperation() {
   operations.forEach(option => { option.checked = option.value === operation; });
-  if (!round) document.body.dataset.operation = operation;
+  document.body.dataset.operation = operation;
   const preview = equationFor({ total: 8, known: 3 }, operation);
   settings.querySelectorAll('[data-preview-first]').forEach(term => { term.textContent = String(preview.first); });
   settings.querySelectorAll('[data-preview-operator]').forEach(term => { term.textContent = preview.symbol; });
@@ -194,14 +195,14 @@ function setInputEnabled(enabled: boolean) {
 }
 
 function describeBoard(current: ComplementRound) {
-  board.setAttribute('aria-label', roundOperation === 'subtraction'
+  board.setAttribute('aria-label', operation === 'subtraction'
     ? `ブロック ${current.total}こ、あおを ${current.known}こ のこそう`
     : `あお ${current.known}こ、あき ${current.answer}マス`);
 }
 
 function boardCellClass(current: ComplementRound, index: number) {
   if (index < current.known) return 'slot block blue';
-  return roundOperation === 'subtraction' ? 'slot block orange' : 'slot';
+  return operation === 'subtraction' ? 'slot block orange' : 'slot';
 }
 
 function begin(total: number) {
@@ -213,8 +214,6 @@ function begin(total: number) {
   }
   const current = source(performance.now());
   round = current;
-  roundOperation = operation;
-  document.body.dataset.operation = roundOperation;
   phase = 'choosing';
 
   effects.replaceChildren();
@@ -229,7 +228,7 @@ function begin(total: number) {
   next.hidden = true;
   result.hidden = true;
   supply.hidden = false;
-  const terms = equationFor(current, roundOperation);
+  const terms = equationFor(current, operation);
   first.textContent = String(terms.first);
   renderOperator(element('operator'), terms.symbol);
   second.textContent = '?';
@@ -272,7 +271,7 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
     return;
   }
   supply.setAttribute('aria-label', showBlocks
-    ? roundOperation === 'subtraction' ? 'とるブロック' : 'おくブロック'
+    ? operation === 'subtraction' ? 'とるブロック' : 'おくブロック'
     : 'こたえの せんたくし');
   const choices = current.choices.map(quantity => makeChoice(current, quantity));
   supply.replaceChildren(...choices);
@@ -281,7 +280,7 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
 }
 
 async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[], correct: boolean) {
-  if (roundOperation === 'subtraction') {
+  if (operation === 'subtraction') {
     const removed = cells.slice(-blocks.length);
     removed.forEach(cell => cell.classList.add('removed'));
     await pause(210);
@@ -315,7 +314,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     playSound('incorrect');
     const extra = quantity - current.answer;
     feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
-    if (blocks.length && roundOperation === 'addition') {
+    if (blocks.length && operation === 'addition') {
       overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
     }
     control.classList.add('shake');
@@ -363,7 +362,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   phase = 'complete';
   collected += 1;
   showScore();
-  saveComplementCompletion(current, roundOperation, !!randomCandidates);
+  saveComplementCompletion(current, operation, !!randomCandidates);
   if (blocks.length) {
     second.textContent = String(quantity);
     second.classList.add('solved');
@@ -526,7 +525,6 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
 
 home.addEventListener('click', () => {
   round = undefined;
-  document.body.dataset.operation = operation;
   clearTrial?.();
   second.textContent = '?';
   effects.replaceChildren();
@@ -540,6 +538,7 @@ home.addEventListener('click', () => {
 });
 
 settingsOpen.addEventListener('click', () => {
+  operationSettings.hidden = resetOpen.hidden = !!round;
   showAnswerOptions();
   settings.showModal();
 });
@@ -575,8 +574,11 @@ function setSound(enabled: boolean) {
 }
 
 sound.addEventListener('click', () => setSound(!soundEnabled));
-element('reset-open').addEventListener('click', () => resetSettings.showModal());
+resetOpen.addEventListener('click', () => {
+  if (!round) resetSettings.showModal();
+});
 element('reset-confirm').addEventListener('click', () => {
+  if (round) return;
   setAnswerMethod(defaultAnswerMethod);
   showAnswerOptions();
   setSound(defaultSound);
@@ -597,6 +599,7 @@ next.addEventListener('click', () => {
 });
 
 function setOperation(value: Operation) {
+  if (round) return;
   operation = value;
   saveOperation(operation);
   showOperation();
