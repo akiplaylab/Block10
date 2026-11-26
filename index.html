@@ -32,7 +32,7 @@
       <span class="sky-star star-three">✦</span><span class="sky-star star-four">✦</span>
     </div>
     <header>
-      <button id="home" class="utility" type="button" hidden><span aria-hidden="true">⌂</span> <span data-text="home">Home</span></button>
+      <button id="home" class="utility" type="button" aria-label="Home" data-label="home" hidden><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7M5 9v11h5v-6h4v6h5V9"/></svg></button>
       <div id="score" class="score" aria-live="polite" hidden></div>
       <button id="settings-open" class="utility" type="button" aria-label="Settings" data-label="settings">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
@@ -51,16 +51,14 @@
             <span id="preview-first"></span> <span id="preview-operator"></span> <span>?</span> <span data-operator="="></span> <span id="preview-result"></span>
           </div>
           <div id="ten-blocks" role="img"></div>
-          <button id="play-ten" class="primary" type="button"><span data-text="play">Play</span></button>
+          <button id="play-ten" class="primary" type="button"><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg></button>
         </div>
-        <div class="other-modes">
-          <p id="other-modes-label"><span data-text="otherModes">Play with other numbers</span></p>
-          <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label">
-            <button id="play-random" class="choice" type="button">
-              <span data-text="random">Random</span>
-              <span id="random-chips" aria-hidden="true"></span>
-            </button>
-          </div>
+        <div id="modes" class="modes" role="group" aria-label="Play with other numbers" data-label="otherModes">
+
+          <button id="play-random" class="choice" type="button">
+            <svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c1.4 0 2.5-1 3.5-2.5M14.5 8.5C15.5 7 16.6 6 18 6h3m-4-4 4 4-4 4"/></svg>
+            <span id="random-chips" aria-hidden="true"></span>
+          </button>
         </div>
       </section>
       <section id="game" class="game-screen complement" aria-label="Block10" hidden>
@@ -69,35 +67,35 @@
         </div>
         <div id="board" class="board frame" role="img"></div>
         <div class="feedback">
-          <p id="feedback" role="status"></p>
+          <p id="feedback" class="visually-hidden" role="status"></p>
+          <div id="keypad-success" class="result" aria-hidden="true" hidden><span class="success-star" aria-hidden="true">✦</span><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg><span class="success-star" aria-hidden="true">✦</span></div>
           <div id="overflow" class="overflow" aria-hidden="true"></div>
         </div>
         <div class="turn">
           <div id="supply" class="supply"></div>
-          <div id="result" class="result" hidden><span aria-hidden="true">✦</span> <span data-text="success">You did it!</span> <span aria-hidden="true">✦</span></div>
+          <div id="result" class="result" aria-hidden="true" hidden><span class="success-star" aria-hidden="true">✦</span><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg><span class="success-star" aria-hidden="true">✦</span></div>
         </div>
         <div class="actions">
-          <button id="next" class="primary" type="button" hidden><span data-text="next">Next</span></button>
+          <button id="next" class="primary" type="button" aria-label="Next" data-label="next" hidden><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h17m-7-7 7 7-7 7"/></svg></button>
         </div>
       </section>
     </main>
     <dialog id="settings" class="settings-dialog" aria-labelledby="settings-title">
       <h2 id="settings-title"><span data-text="settings">Settings</span></h2>
       <button id="sound" class="utility sound" type="button" aria-label="Sound" data-label="sound" aria-pressed="true">
-        <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">ON</span>
+        <svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h4l5-4v14l-5-4H3z"/><path class="sound-on" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/><path class="sound-off" d="m16 10 5 5m0-5-5 5"/></svg>
       </button>
       <fieldset id="operation-settings">
         <legend><span data-text="operation">Math</span></legend>
         <div class="operations">
-          <label><input type="radio" name="operation" value="addition" checked><span class="operation-option"><span data-operator="+" aria-hidden="true"></span><span data-text="addition">Add</span></span></label>
-          <label><input type="radio" name="operation" value="subtraction"><span class="operation-option"><span data-operator="−" aria-hidden="true"></span><span data-text="subtraction">Subtract</span></span></label>
+          <label><input type="radio" name="operation" value="addition" aria-label="Add" data-label="addition" checked><span class="operation-option"><span data-operator="+" aria-hidden="true"></span></span></label>
+          <label><input type="radio" name="operation" value="subtraction" aria-label="Subtract" data-label="subtraction"><span class="operation-option"><span data-operator="−" aria-hidden="true"></span></span></label>
         </div>
       </fieldset>
       <fieldset>
         <legend><span data-text="answerMethod">How to answer</span></legend>
         <label class="answer-option">
-          <input type="radio" name="answer-method" value="blocks">
-          <span data-text="blocks">Use blocks</span>
+          <input type="radio" name="answer-method" value="blocks" aria-label="Use blocks" data-label="blocks">
           <span class="method-preview" aria-hidden="true">
             <span><span data-preview-first></span> <span data-preview-operator></span> ? = <span data-preview-result></span></span>
             <span class="preview-tiles"><i class="block blue"></i><i class="block blue"></i><i class="block blue"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i></span>
@@ -105,25 +103,24 @@
           </span>
         </label>
         <label class="answer-option">
-          <input type="radio" name="answer-method" value="choices">
-          <span data-text="choices">Pick a number</span>
+          <input type="radio" name="answer-method" value="choices" aria-label="Pick a number" data-label="choices">
           <span class="method-preview" aria-hidden="true">
             <span><span data-preview-first></span> <span data-preview-operator></span> ? = <span data-preview-result></span></span>
             <span class="preview-choices"><b>4</b><b>5</b><b>6</b></span>
           </span>
         </label>
         <label class="answer-option">
-          <input type="radio" name="answer-method" value="input">
-          <span data-text="input">Type a number</span>
+          <input type="radio" name="answer-method" value="input" aria-label="Type a number" data-label="input">
           <span class="method-preview" aria-hidden="true">
-            <span><span data-preview-first></span> <span data-preview-operator></span> <b class="preview-input">5</b> = <span data-preview-result></span></span>
+            <span><span data-preview-first></span> <span data-preview-operator></span> ? = <span data-preview-result></span></span>
+            <span class="preview-keypad"><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b>0</b></span>
           </span>
         </label>
       </fieldset>
-      <label class="language-setting"><span data-text="language">Language</span>
-        <select id="language"><option value="en" lang="en">English</option><option value="ja" lang="ja">日本語</option></select>
+      <label class="language-setting"><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <select id="language" aria-label="Language" data-label="language"><option value="en" lang="en">English</option><option value="ja" lang="ja">日本語</option></select>
       </label>
-      <form method="dialog"><button id="settings-close" class="utility" type="submit"><span data-text="close">Close</span></button></form>
+      <form method="dialog"><button id="settings-close" class="utility" type="submit" aria-label="Close" data-label="close"><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></form>
       <button id="reset-open" type="button"><span data-text="reset">Reset settings</span></button>
       <p id="offline-ready" class="offline-ready" role="status" hidden>
         <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -143,14 +140,15 @@
     <dialog id="total-editor" class="settings-dialog" aria-labelledby="editor-title">
       <div class="editor-panel">
         <div class="editor-heading">
-          <h2 id="editor-title"><span data-text="editorTitle">Choose numbers to play with</span></h2>
-          <p id="editor-count" role="status" hidden></p>
+          <h2 id="editor-title"><span data-text="editorTitle">Numbers</span></h2>
+          <p id="editor-count" aria-hidden="true" hidden></p>
+          <p id="editor-count-status" class="visually-hidden" role="status"></p>
         </div>
         <div class="editor-options">
           <div id="editor-numbers" class="editor-numbers" role="group" aria-labelledby="editor-title"></div>
         </div>
         <p id="editor-empty-note" hidden><span data-text="editorEmpty">Close with no numbers selected to go back to 5 and 10.</span></p>
-        <form method="dialog"><button class="utility" type="submit" autofocus><span data-text="close">Close</span></button></form>
+        <form method="dialog"><button class="utility" type="submit" aria-label="Close" data-label="close" autofocus><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></form>
       </div>
     </dialog>
     <div id="effects" aria-hidden="true"></div>

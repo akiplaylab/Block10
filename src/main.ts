@@ -30,6 +30,7 @@ const resetSettings = element<HTMLDialogElement>('reset-settings');
 const editor = element<HTMLDialogElement>('total-editor');
 const editorNumbers = element('editor-numbers');
 const editorCount = element('editor-count');
+const editorCountStatus = element('editor-count-status');
 const editorEmptyNote = element('editor-empty-note');
 const languageSelect = element<HTMLSelectElement>('language');
 const sound = element<HTMLButtonElement>('sound');
@@ -38,6 +39,7 @@ const supply = element('supply');
 const score = element('score');
 const result = element('result');
 const feedback = element('feedback');
+const keypadSuccess = element('keypad-success');
 const overflow = element('overflow');
 const first = element('first');
 const second = element('second');
@@ -60,8 +62,9 @@ let answerMethod = readAnswerMethod();
 let favoriteTotals = readFavoriteTotals();
 let randomTotals = readRandomTotals();
 let language = readLanguage();
-let feedbackMessage: 'tooMany' | 'tooFew' | undefined;
+let feedbackMessage: 'tooMany' | 'tooFew' | 'incorrect' | 'success' | undefined;
 let clearTrial: (() => void) | undefined;
+let successTimer: number | undefined;
 
 function t(key: Message, values?: Record<string, string | number>) {
   return translate(language, key, values);
@@ -116,7 +119,12 @@ function showLanguage() {
 
 function showSound() {
   sound.setAttribute('aria-pressed', String(soundEnabled));
-  element('sound-state').textContent = soundEnabled ? t('on') : t('off');
+}
+
+function hideKeypadSuccess() {
+  window.clearTimeout(successTimer);
+  successTimer = undefined;
+  keypadSuccess.hidden = true;
 }
 
 function showScore() {
@@ -133,6 +141,9 @@ function showOperation() {
   settings.querySelectorAll('.preview-tiles .slot').forEach(tile => {
     tile.classList.toggle('block', operation === 'subtraction');
     tile.classList.toggle('orange', operation === 'subtraction');
+  });
+  settings.querySelectorAll('.preview-choices i').forEach(tile => {
+    tile.className = operation === 'subtraction' ? 'slot' : 'block orange';
   });
   const known = 7;
   const missing = mainTotal - known;
@@ -267,7 +278,7 @@ function boardCellClass(current: ComplementRound, index: number) {
   return operation === 'subtraction' ? 'slot block orange' : 'slot';
 }
 
-function begin(total: number) {
+function begin(total: number, keepSuccess = false) {
   clearTrial?.();
   let source = questions.get(total);
   if (!source) {
@@ -279,7 +290,10 @@ function begin(total: number) {
   phase = 'choosing';
 
   effects.replaceChildren();
-  showFeedback();
+  if (!keepSuccess) {
+    hideKeypadSuccess();
+    showFeedback();
+  }
   overflow.replaceChildren();
   title.hidden = true;
   game.hidden = false;
@@ -305,6 +319,10 @@ function begin(total: number) {
 
 function showAnswerMethod(current: ComplementRound, focus = false) {
   clearTrial?.();
+  if (!keypadSuccess.hidden && answerMethod !== 'input') {
+    hideKeypadSuccess();
+    showFeedback();
+  }
   game.dataset.method = answerMethod;
   const showBlocks = answerMethod === 'blocks';
   board.hidden = !showBlocks;
@@ -341,9 +359,12 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
 
 async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[], correct: boolean) {
   const subtracting = operation === 'subtraction';
+  const excess = subtracting ? 0 : Math.max(0, blocks.length - current.answer);
+  const extraSlots = Array.from({ length: excess }, () => document.createElement('span'));
+  overflow.replaceChildren(...extraSlots);
   const boardBlocks = subtracting
     ? cells.slice(-blocks.length).reverse()
-    : cells.slice(current.known, current.known + blocks.length);
+    : [...cells.slice(current.known, current.known + blocks.length), ...extraSlots];
   const choiceBlocks = blocks.slice(0, boardBlocks.length);
   const sources = subtracting ? boardBlocks : choiceBlocks;
   const destinations = subtracting ? choiceBlocks : boardBlocks;
@@ -369,6 +390,8 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
 
   const enteredOnKeypad = game.dataset.method === 'input';
   clearTrial?.();
+  hideKeypadSuccess();
+  showFeedback();
   phase = 'animating';
   setInputEnabled(false);
   enableSound(soundEnabled);
@@ -382,13 +405,9 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
 
   if (!correct) {
     playSound('incorrect');
-    const extra = quantity - current.answer;
-    showFeedback(extra > 0 ? 'tooMany' : 'tooFew');
-    if (blocks.length && operation === 'addition') {
-      overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
-    }
+    showFeedback(blocks.length ? (quantity > current.answer ? 'tooMany' : 'tooFew') : 'incorrect');
     control.classList.add('shake');
-    const timer = window.setTimeout(() => clearTrial?.(), 950);
+    const timer = window.setTimeout(() => control.classList.remove('shake'), 280);
     clearTrial = () => {
       window.clearTimeout(timer);
       restoreBlocks?.();
@@ -405,6 +424,14 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
 
   second.textContent = String(quantity);
   second.classList.add('solved');
+  showFeedback('success');
+  if (enteredOnKeypad) {
+    keypadSuccess.hidden = false;
+    successTimer = window.setTimeout(() => {
+      hideKeypadSuccess();
+      showFeedback();
+    }, 650);
+  }
   if (blocks.length) {
     playSound('place');
     board.classList.add('flash');
@@ -430,7 +457,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   saveComplementCompletion(current, operation, !!randomCandidates);
   if (enteredOnKeypad) {
     playSound('success');
-    advanceRound(current);
+    advanceRound(current, true);
     return;
   }
   supply.hidden = true;
@@ -560,7 +587,8 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
       button.setAttribute('aria-disabled', String(unavailable));
     });
     if (random) {
-      editorCount.textContent = t('editorCount', { count: randomTotals.length, max: maxRandomTotals });
+      editorCount.textContent = `${randomTotals.length} / ${maxRandomTotals}`;
+      editorCountStatus.textContent = t('editorCount', { count: randomTotals.length, max: maxRandomTotals });
       editorEmptyNote.classList.toggle('invisible', randomTotals.length > 0);
     }
   }
@@ -586,6 +614,9 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
 home.addEventListener('click', () => {
   round = undefined;
   clearTrial?.();
+  overflow.replaceChildren();
+  hideKeypadSuccess();
+  showFeedback();
   second.textContent = '?';
   effects.replaceChildren();
   game.hidden = true;
@@ -650,8 +681,8 @@ element('reset-confirm').addEventListener('click', () => {
   showRandomMode();
 });
 
-function advanceRound(current: ComplementRound) {
-  begin(randomCandidates ? drawTotal(randomCandidates) : current.total);
+function advanceRound(current: ComplementRound, keepSuccess = false) {
+  begin(randomCandidates ? drawTotal(randomCandidates) : current.total, keepSuccess);
 }
 
 next.addEventListener('click', () => {

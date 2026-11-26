@@ -159,16 +159,17 @@ header {
   font-size: clamp(14px, 2.2vw, 19px);
 }
 
-#home [aria-hidden="true"] { font-size: 1.45em; line-height: 1; }
-#settings-open { margin-left: auto; min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
-.sound { min-width: 5.4em; margin-bottom: 12px; }
-.speaker {
-  width: 1.12em;
-  height: 1.15em;
-  background: #2688e5;
-  clip-path: polygon(0 31%, 24% 31%, 57% 0, 57% 100%, 24% 69%, 0 69%, 0 31%, 66% 33%, 66% 21%, 83% 31%, 90% 50%, 83% 69%, 66% 79%, 66% 67%, 74% 60%, 78% 50%, 74% 40%, 66% 33%);
+.icon { flex: none; width: 1.3em; height: 1.3em; vertical-align: middle; }
+#home, #settings-close, #total-editor form .utility {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 20px;
 }
-.sound[aria-pressed="false"] .speaker { background: #65718d; clip-path: polygon(0 31%, 24% 31%, 57% 0, 57% 100%, 24% 69%, 0 69%); }
+#settings-open { margin-left: auto; min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
+.sound { min-width: 44px; min-height: 44px; margin-bottom: 12px; font-size: 19px; }
+.sound[aria-pressed="true"] .sound-off,
+.sound[aria-pressed="false"] .sound-on { display: none; }
 
 main { position: relative; height: 100%; }
 
@@ -341,12 +342,17 @@ main { position: relative; height: 100%; }
 .actions { display: flex; align-items: center; justify-content: center; }
 .actions:has(#next[hidden]) { display: none; }
 .result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .25em;
   color: #b82b71;
   font-size: min(9vw, 7.4vh, 54px);
   text-shadow: 0 2px 0 white, 0 0 9px white;
   animation: pop 360ms ease-out both;
 }
-.result [aria-hidden="true"] { color: #f5a51a; font-size: .75em; }
+.success-star { color: #f5a51a; font-size: .75em; }
+#keypad-success { font-size: clamp(14px, calc(4 * var(--viewport-unit, 1vh)), 28px); }
 
 .flyer {
   --flight-duration: 210ms;
@@ -462,7 +468,7 @@ body[data-operation="subtraction"] .flyer { animation-name: fly-position, fly-sh
   box-shadow: none;
 }
 
-.main-mode, .other-modes {
+.main-mode {
   display: grid;
   justify-items: center;
   gap: clamp(5px, 1.1vh, 12px);
@@ -567,11 +573,6 @@ body[data-operation="subtraction"] .flyer { animation-name: fly-position, fly-sh
   font-size: clamp(23px, 5vh, 42px);
 }
 
-.other-modes p {
-  margin: 0;
-  font-size: clamp(14px, 2.8vh, 21px);
-}
-
 .modes {
   --rows: 4;
   --choice-piece: clamp(8px, min(3.6vw, 2.15vh), 17px);
@@ -630,7 +631,7 @@ body:has(#total-editor[open]) .mode-card.editing {
 
 .modes #play-random {
   align-content: center;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto;
   font-size: clamp(13px, 4vw, 22px);
 }
 
@@ -723,18 +724,24 @@ body:has(#total-editor[open]) .mode-card.editing {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 1.6vw, 16px);
-  color: #72482f;
-  font-size: clamp(14px, min(4vw, calc(4 * var(--viewport-unit, 1vh))), 22px);
 }
-.feedback p { margin: 0; white-space: nowrap; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .overflow {
-  --extra-piece: clamp(6px, 1.1vh, 8px);
+  --extra-piece: clamp(9px, calc(1.8 * var(--viewport-unit, 1vh)), 15px);
   display: grid;
-  grid-template-columns: repeat(5, var(--extra-piece));
+  grid-template-columns: repeat(9, var(--extra-piece));
+  grid-auto-rows: var(--extra-piece);
   gap: 2px;
 }
-.overflow .block { aspect-ratio: 1; }
 .overflow:empty { display: none; }
 
 @media (orientation: landscape) and (max-height: 580px) {
@@ -760,7 +767,7 @@ body:has(#total-editor[open]) .mode-card.editing {
 @media (max-height: 500px) {
   .title-screen { gap: 6px; }
   .title-screen .logo { font-size: min(13vw, 9vh); }
-  .main-mode, .other-modes { gap: 4px; }
+  .main-mode { gap: 4px; }
   .modes .choice {
     --choice-gap: 2px;
     --choice-pad: 4px;
@@ -910,7 +917,7 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 
 @media (orientation: landscape) and (max-height: 420px) {
   #total-editor { width: min(calc(100% - 24px), 580px); }
-  #total-editor:has(#editor-count[hidden]) .editor-heading { padding-right: 84px; min-height: 42px; }
+  #total-editor:has(#editor-count[hidden]) .editor-heading { padding-right: 54px; min-height: 42px; }
   #total-editor:has(#editor-count[hidden]) form { position: absolute; top: 8px; right: 10px; margin: 0; }
 }
 
@@ -924,7 +931,7 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 
 .answer-option {
   display: grid;
-  grid-template-columns: auto 1fr minmax(72px, auto);
+  grid-template-columns: auto 1fr;
   gap: clamp(6px, 2vw, 12px);
   align-items: center;
   padding: 6px 8px;
@@ -941,7 +948,16 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 .method-preview { display: grid; justify-items: center; gap: 2px; font: 800 12px / 1 system-ui, sans-serif; }
 .preview-tiles, .preview-choices, .preview-choices b { display: flex; align-items: center; gap: 2px; }
 .method-preview i { width: 7px; height: 7px; box-shadow: none; }
-.preview-choices b, .preview-input { padding: 2px 4px; border-radius: 4px; background: #ffedcb; color: #9c4709; }
+.preview-choices b, .preview-keypad b { padding: 2px 4px; border-radius: 4px; background: #ffedcb; color: #9c4709; }
+.preview-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  font-size: 9px;
+  text-align: center;
+}
+.preview-keypad b { padding: 1px 4px; }
+.preview-keypad b:last-child { grid-column: 2; }
 
 .complement:is([data-method="choices"], [data-method="input"]) {
   grid-template-areas: "equation" "feedback" "turn" "actions";
@@ -962,9 +978,9 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 }
 
 @media (orientation: landscape) and (max-height: 580px) {
-  .complement[data-method="blocks"] { grid-template-areas: "equation actions" "board turn" "feedback feedback"; }
+  .complement[data-method="blocks"] { grid-template-areas: "equation actions" "board turn" "feedback ."; }
   .complement[data-method="blocks"]:has(#next[hidden]) {
-    grid-template-areas: "equation equation" "board turn" "feedback feedback";
+    grid-template-areas: "equation equation" "board turn" "feedback .";
     grid-template-rows: auto auto var(--feedback-height);
   }
 }
