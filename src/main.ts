@@ -407,15 +407,22 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     playSound('incorrect');
     showFeedback(blocks.length ? (quantity > current.answer ? 'tooMany' : 'tooFew') : 'incorrect');
     control.classList.add('shake');
-    const timer = window.setTimeout(() => control.classList.remove('shake'), 280);
-    clearTrial = () => {
-      window.clearTimeout(timer);
+    const shakeTimer = window.setTimeout(() => control.classList.remove('shake'), 280);
+    const restoreTimer = restoreBlocks
+      ? window.setTimeout(() => {
+        if (clearTrial === resetTrial) resetTrial();
+      }, 950)
+      : undefined;
+    function resetTrial() {
+      window.clearTimeout(shakeTimer);
+      window.clearTimeout(restoreTimer);
       restoreBlocks?.();
       control.classList.remove('shake');
       showFeedback();
       overflow.replaceChildren();
       clearTrial = undefined;
-    };
+    }
+    clearTrial = resetTrial;
     phase = 'choosing';
     setInputEnabled(true);
     applyAnswerMethod();

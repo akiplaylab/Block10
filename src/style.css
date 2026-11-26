@@ -346,7 +346,7 @@ main { position: relative; height: 100%; }
   align-items: center;
   justify-content: center;
   gap: .25em;
-  color: #b82b71;
+  color: #16774a;
   font-size: min(9vw, 7.4vh, 54px);
   text-shadow: 0 2px 0 white, 0 0 9px white;
   animation: pop 360ms ease-out both;

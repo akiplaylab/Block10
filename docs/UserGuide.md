@@ -12,9 +12,9 @@ Find the number that goes in the **?**. In `7 + ? = 10`, work out how many to ad
 - The **row of numbers** preview lets you choose the answer.
 - The **number pad** preview lets you enter the answer using the number buttons. A correct answer takes you straight to the next problem.
 
-If you make a mistake, you can try the same problem again. With blocks, the result stays on screen until you answer again. When adding, look for empty spaces or extra blocks below the frame. When subtracting, look for orange blocks left behind or gaps where blue blocks were taken away.
+If you make a mistake, you can try the same problem again right away. With blocks, the result appears briefly before the blocks return to their starting positions. When adding, look for empty spaces or extra blocks below the frame. When subtracting, look for orange blocks left behind or gaps where blue blocks were taken away.
 
-A **check mark with stars** shows a correct answer. Press **→** when it appears to move on. Press the **house icon** to return home.
+A **green check mark with stars** shows a correct answer. Press **→** when it appears to move on. Press the **house icon** to return home.
 
 ## Settings
 
