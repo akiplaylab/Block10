@@ -4,7 +4,7 @@ import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
 import { renderOperator } from './operator-symbol';
-import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, minRandomTotals, parseRandomTotals, selectableTotals } from './random-totals';
+import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, minRandomTotals, selectableTotals } from './random-totals';
 import { defaultAnswerMethod, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
@@ -26,7 +26,6 @@ const resetSettings = element<HTMLDialogElement>('reset-settings');
 const editor = element<HTMLDialogElement>('total-editor');
 const editorNumbers = element('editor-numbers');
 const editorCount = element('editor-count');
-const editorSave = element<HTMLButtonElement>('editor-save');
 const sound = element<HTMLButtonElement>('sound');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
@@ -377,19 +376,19 @@ playTen.addEventListener('click', () => {
   if (game.hidden) startMode(playTen, mainTotal);
 });
 
-function makeModeCard(play: HTMLButtonElement, editTotal: () => void) {
+function makeModeCard(play: HTMLButtonElement, favoriteIndex?: number) {
   const card = document.createElement('div');
   card.className = 'mode-card';
   const edit = document.createElement('button');
   edit.type = 'button';
   edit.className = 'utility edit-total';
   edit.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m4 16-1 5 5-1L21 7l-4-4zM14 6l4 4"/></svg>';
-  edit.addEventListener('click', editTotal);
+  edit.addEventListener('click', () => openTotalEditor(card, favoriteIndex));
   card.append(play, edit);
   return card;
 }
 
-const randomCard = makeModeCard(playRandom, () => openTotalEditor());
+const randomCard = makeModeCard(playRandom);
 randomCard.lastElementChild!.setAttribute('aria-label', 'ランダムの かずを かえる');
 modes.append(randomCard);
 
@@ -400,7 +399,7 @@ const favoriteButtons = favoriteTotals.map((_, index) => {
   button.addEventListener('click', () => {
     if (game.hidden) startMode(button, favoriteTotals[index]);
   });
-  modes.insertBefore(makeModeCard(button, () => openTotalEditor(index)), randomCard);
+  modes.insertBefore(makeModeCard(button, index), randomCard);
   return button;
 });
 
@@ -428,9 +427,26 @@ playRandom.addEventListener('click', () => {
   if (game.hidden) startMode(playRandom, drawTotal(randomTotals), [...randomTotals]);
 });
 
-function openTotalEditor(favoriteIndex?: number) {
+function positionTotalEditor(card: HTMLElement) {
+  const { clientWidth: width, clientHeight: height } = document.documentElement;
+  const bounds = card.getBoundingClientRect();
+  const gap = 16;
+  const edge = 12;
+  const above = bounds.top - gap;
+  const below = height - bounds.bottom - gap;
+  const placeAbove = above >= below;
+  const editorWidth = editor.offsetWidth;
+  const center = bounds.left + bounds.width / 2;
+  const left = Math.max(edge, Math.min(center - editorWidth / 2, width - editorWidth - edge));
+  editor.dataset.side = placeAbove ? 'above' : 'below';
+  editor.style.left = left + 'px';
+  editor.style.setProperty('--editor-arrow', center - left + 'px');
+  editor.style.setProperty('--editor-anchor', (placeAbove ? height - above : bounds.bottom + gap) + 'px');
+  editor.style.setProperty('--editor-height', Math.max(0, Math.max(above, below) - edge) + 'px');
+}
+
+function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
   const random = favoriteIndex === undefined;
-  const selected = new Set(random ? randomTotals : [favoriteTotals[favoriteIndex]]);
   element('editor-title').textContent = random
     ? `あそびたい かずを ${minRandomTotals} ～ ${maxRandomTotals} つ えらんでね`
     : 'あそびたい かずを えらんでね';
@@ -441,11 +457,17 @@ function openTotalEditor(favoriteIndex?: number) {
     button.className = 'utility';
     button.textContent = String(total);
     button.addEventListener('click', () => {
+      if (button.getAttribute('aria-disabled') === 'true') return;
       if (random) {
-        if (!selected.delete(total) && selected.size < maxRandomTotals) selected.add(total);
+        randomTotals = randomTotals.includes(total)
+          ? randomTotals.filter(candidate => candidate !== total)
+          : [...randomTotals, total].sort((a, b) => a - b);
+        saveRandomTotals(randomTotals);
+        showRandomMode();
       } else {
-        selected.clear();
-        selected.add(total);
+        favoriteTotals[favoriteIndex] = total;
+        saveFavoriteTotals(favoriteTotals);
+        showFavorites();
       }
       refresh();
     });
@@ -455,35 +477,27 @@ function openTotalEditor(favoriteIndex?: number) {
   function refresh() {
     buttons.forEach((button, index) => {
       const total = selectableTotals[index];
-      const pressed = selected.has(total);
-      button.setAttribute('aria-pressed', String(pressed));
-      button.disabled = random
-        ? !pressed && selected.size === maxRandomTotals
+      const pressed = random ? randomTotals.includes(total) : total === favoriteTotals[favoriteIndex];
+      const unavailable = random
+        ? randomTotals.length === (pressed ? minRandomTotals : maxRandomTotals)
         : total === mainTotal || (!pressed && favoriteTotals.includes(total));
+      button.setAttribute('aria-pressed', String(pressed));
+      button.setAttribute('aria-disabled', String(unavailable));
     });
-    editorCount.textContent = `${selected.size} つ えらんだよ`;
-    editorSave.disabled = random && selected.size < minRandomTotals;
+    if (random) editorCount.textContent = `${randomTotals.length} つ えらんだよ`;
   }
 
-  editorSave.onclick = () => {
-    if (random) {
-      const totals = parseRandomTotals([...selected].sort((a, b) => a - b));
-      if (!totals) return;
-      randomTotals = totals;
-      saveRandomTotals(randomTotals);
-      showRandomMode();
-    } else {
-      const [total] = selected;
-      favoriteTotals[favoriteIndex] = total;
-      saveFavoriteTotals(favoriteTotals);
-      showFavorites();
-    }
-    editor.close();
-  };
   editorNumbers.replaceChildren(...buttons);
   refresh();
+  card.classList.add('editing');
   editor.showModal();
-  editorNumbers.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus();
+  const reposition = () => positionTotalEditor(card);
+  reposition();
+  window.addEventListener('resize', reposition);
+  editor.addEventListener('close', () => {
+    card.classList.remove('editing');
+    window.removeEventListener('resize', reposition);
+  }, { once: true });
 }
 
 home.addEventListener('click', () => {

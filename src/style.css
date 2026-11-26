@@ -561,6 +561,16 @@ main { position: relative; height: 100%; }
   gap: 5px;
 }
 
+body:has(#total-editor[open]) .mode-card.editing {
+  position: relative;
+  z-index: 4;
+  border-radius: 16px;
+  background: var(--operation-surface);
+  outline: 3px solid var(--operation-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 200vmax #21376280;
+}
+
 .edit-total {
   justify-self: end;
   width: 44px;
@@ -800,12 +810,61 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
   gap: 7px;
 }
 
+#total-editor {
+  position: fixed;
+  inset: auto;
+  width: min(calc(100% - 24px), 460px);
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+#total-editor[data-side="above"] { bottom: var(--editor-anchor); }
+#total-editor[data-side="below"] { top: var(--editor-anchor); }
+#total-editor::backdrop { background: transparent; }
+
+#total-editor::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--editor-arrow) - 2px);
+  width: 18px;
+  height: 18px;
+  transform: translateX(-50%) rotate(45deg);
+  border: solid white;
+  background: #f5fbff;
+  pointer-events: none;
+}
+
+#total-editor[data-side="above"]::after { bottom: -10px; border-width: 0 2px 2px 0; }
+#total-editor[data-side="below"]::after { top: -10px; border-width: 2px 0 0 2px; }
+
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--editor-height, 100dvh) - 4px);
+  padding: 10px;
+}
+
+.editor-heading { padding: 4px 4px 0; }
+.editor-options { overflow-y: auto; padding: 4px 4px 7px; }
+#editor-count { margin: 0 0 7px; font-size: .9rem; }
+#total-editor form { margin: 5px 4px 0; }
+#total-editor form .utility { min-height: 44px; }
+
+@media (orientation: landscape) and (max-height: 420px) {
+  #total-editor { width: min(calc(100% - 24px), 580px); }
+  .editor-heading { padding-right: 84px; min-height: 42px; }
+  #total-editor form { position: absolute; top: 8px; right: 10px; margin: 0; }
+}
+
 .editor-numbers .utility { min-height: 44px; padding: 0; }
 .editor-numbers [aria-pressed="true"] {
   background: #315aa2;
   color: white;
 }
-.settings-dialog button:disabled { opacity: .5; cursor: default; }
+.editor-numbers [aria-disabled="true"] { cursor: default; box-shadow: none; border-style: dashed; }
+.editor-numbers [aria-disabled="true"][aria-pressed="false"] { opacity: .5; }
 
 .answer-option {
   display: grid;
