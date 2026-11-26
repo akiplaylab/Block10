@@ -2,7 +2,7 @@
 
 [English](Philosophy.md) | [日本語](Philosophy.ja.md)
 
-Block10 is a free educational tool that helps learners deepen their understanding and build their calculation skills.
+Block10 is an educational tool that helps learners deepen their understanding and build their calculation skills.
 
 - We give immediate feedback on correct and incorrect answers and treat mistakes as part of learning. Learners can try as many times as they like without losing points or being penalized. Repeated practice gives them many opportunities to learn.
 - We make learning itself fun. Learners can decide when to play without unrelated rewards, streaks, or quotas pushing them to continue.
