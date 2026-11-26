@@ -9,6 +9,13 @@ export function parseTotalSelection(value: unknown, count: number, excluded?: nu
   return value;
 }
 
+export const minRandomTotals = 2;
+export const maxRandomTotals = 3;
+
+export function parseRandomTotals(value: unknown) {
+  return parseTotalSelection(value, minRandomTotals) ?? parseTotalSelection(value, maxRandomTotals);
+}
+
 export function drawTotal(candidates: readonly number[], random = Math.random) {
   return candidates[Math.floor(random() * candidates.length)];
 }

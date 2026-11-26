@@ -160,8 +160,8 @@ header {
 }
 
 #home span { font-size: 1.45em; line-height: 1; }
-#settings-open { min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
-.sound { margin-left: auto; min-width: 5.4em; }
+#settings-open { margin-left: auto; min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
+.sound { min-width: 5.4em; margin-bottom: 12px; }
 .speaker {
   width: 1.12em;
   height: 1.15em;
@@ -554,6 +554,30 @@ main { position: relative; height: 100%; }
   width: min(94vw, 460px);
 }
 
+.mode-card {
+  display: grid;
+  justify-items: stretch;
+  min-width: 0;
+  gap: 5px;
+}
+
+body:has(#total-editor[open]) .mode-card.editing {
+  position: relative;
+  z-index: 4;
+  border-radius: 16px;
+  background: var(--operation-surface);
+  outline: 3px solid var(--operation-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 200vmax #21376280;
+}
+
+.edit-total {
+  justify-self: end;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
 .modes .choice, .complement .supply .choice {
   display: grid;
   grid-template-rows: var(--choice-number-size) 1fr;
@@ -747,7 +771,7 @@ main { position: relative; height: 100%; }
   pointer-events: none;
 }
 
-#settings {
+.settings-dialog {
   width: min(calc(100% - 24px), 420px);
   max-height: calc(100% - 24px);
   padding: clamp(12px, 4vw, 22px);
@@ -759,28 +783,88 @@ main { position: relative; height: 100%; }
   touch-action: pan-y;
 }
 
-body:has(#settings[open]) { touch-action: pan-y; }
-#settings::backdrop { background: #21376270; }
-#settings h2 { margin: 0 0 8px; font-size: 1.2rem; }
+body:has(.settings-dialog[open]) { touch-action: pan-y; }
+.settings-dialog::backdrop { background: #21376270; }
+.settings-dialog h2 { margin: 0 0 8px; font-size: 1.2rem; }
 #settings fieldset { display: grid; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
 #settings legend { margin-bottom: 6px; font-size: .95rem; }
-#settings form { margin-top: 10px; }
-#settings form[method="dialog"] { text-align: right; }
+.settings-dialog form { margin-top: 10px; }
+.settings-dialog form[method="dialog"] { text-align: right; }
 
-#settings .total-settings { margin-top: 12px; }
-.total-selectors { display: flex; gap: 8px; font-size: .85rem; }
-.total-selectors label { flex: 1; min-width: 0; }
-.total-selectors select {
+#reset-open {
   display: block;
-  width: 100%;
+  margin: 10px 0 0;
   min-height: 44px;
-  padding: 4px 8px;
-  border: 1px solid #9ab4d7;
-  border-radius: 8px;
-  background: white;
-  color: inherit;
+  padding: 0 4px;
+  background: transparent;
+  border: 0;
+  color: #425a80;
   font: inherit;
+  font-size: .85rem;
+  text-decoration: underline;
 }
+
+.editor-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  gap: 7px;
+}
+
+#total-editor {
+  position: fixed;
+  inset: auto;
+  width: min(calc(100% - 24px), 460px);
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+#total-editor[data-side="above"] { bottom: var(--editor-anchor); }
+#total-editor[data-side="below"] { top: var(--editor-anchor); }
+#total-editor::backdrop { background: transparent; }
+
+#total-editor::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--editor-arrow) - 2px);
+  width: 18px;
+  height: 18px;
+  transform: translateX(-50%) rotate(45deg);
+  border: solid white;
+  background: #f5fbff;
+  pointer-events: none;
+}
+
+#total-editor[data-side="above"]::after { bottom: -10px; border-width: 0 2px 2px 0; }
+#total-editor[data-side="below"]::after { top: -10px; border-width: 2px 0 0 2px; }
+
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--editor-height, 100dvh) - 4px);
+  padding: 10px;
+}
+
+.editor-heading { padding: 4px 4px 0; }
+.editor-options { overflow-y: auto; padding: 4px 4px 7px; }
+#editor-count { margin: 0 0 7px; font-size: .9rem; }
+#total-editor form { margin: 5px 4px 0; }
+#total-editor form .utility { min-height: 44px; }
+
+@media (orientation: landscape) and (max-height: 420px) {
+  #total-editor { width: min(calc(100% - 24px), 580px); }
+  .editor-heading { padding-right: 84px; min-height: 42px; }
+  #total-editor form { position: absolute; top: 8px; right: 10px; margin: 0; }
+}
+
+.editor-numbers .utility { min-height: 44px; padding: 0; }
+.editor-numbers [aria-pressed="true"] {
+  background: #315aa2;
+  color: white;
+}
+.editor-numbers [aria-disabled="true"] { cursor: default; box-shadow: none; border-style: dashed; }
+.editor-numbers [aria-disabled="true"][aria-pressed="false"] { opacity: .5; }
 
 .answer-option {
   display: grid;

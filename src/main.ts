@@ -4,8 +4,8 @@ import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
 import { renderOperator } from './operator-symbol';
-import { drawTotal, mainTotal, selectableTotals } from './random-totals';
-import { isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound } from './storage';
+import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, minRandomTotals, selectableTotals } from './random-totals';
+import { defaultAnswerMethod, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T;
@@ -22,6 +22,10 @@ const home = element<HTMLButtonElement>('home');
 const settingsOpen = element<HTMLButtonElement>('settings-open');
 const settings = element<HTMLDialogElement>('settings');
 const answerOptions = settings.querySelectorAll<HTMLInputElement>('input[name="answer-method"]');
+const resetSettings = element<HTMLDialogElement>('reset-settings');
+const editor = element<HTMLDialogElement>('total-editor');
+const editorNumbers = element('editor-numbers');
+const editorCount = element('editor-count');
 const sound = element<HTMLButtonElement>('sound');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
@@ -47,8 +51,8 @@ let collected = 0;
 let operation = readOperation();
 let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
-const favoriteTotals = readFavoriteTotals();
-const randomTotals = readRandomTotals();
+let favoriteTotals = readFavoriteTotals();
+let randomTotals = readRandomTotals();
 let clearTrial: (() => void) | undefined;
 
 function showSound() {
@@ -207,15 +211,11 @@ function begin(total: number) {
   feedback.textContent = '';
   overflow.replaceChildren();
   title.hidden = true;
-  settingsOpen.hidden = true;
   game.hidden = false;
   document.body.classList.add('playing');
   home.hidden = false;
   score.hidden = false;
   showScore();
-  game.dataset.method = answerMethod;
-  const showBlocks = answerMethod === 'blocks';
-  board.hidden = !showBlocks;
   next.hidden = true;
   result.hidden = true;
   supply.hidden = false;
@@ -227,23 +227,37 @@ function begin(total: number) {
   element('answer').textContent = String(terms.result);
   game.style.setProperty('--rows', String(Math.ceil(total / blocksPerRow)));
   board.dataset.total = String(total);
-  board.classList.remove('merged', 'flash');
   equation.classList.remove('flash');
   rainbow.textContent = String(terms.result);
-  rainbow.hidden = true;
-  cells = Array.from({ length: showBlocks ? total : 0 }, (_, index) => {
+  showAnswerMethod(current, true);
+}
+
+function showAnswerMethod(current: ComplementRound, focus = false) {
+  clearTrial?.();
+  game.dataset.method = answerMethod;
+  const showBlocks = answerMethod === 'blocks';
+  board.hidden = !showBlocks;
+  const solved = phase === 'complete';
+  board.classList.remove('flash');
+  board.classList.toggle('merged', solved);
+  rainbow.hidden = !solved;
+  cells = Array.from({ length: showBlocks ? current.total : 0 }, (_, index) => {
     const cell = document.createElement('span');
     cell.className = boardCellClass(current, index);
     return cell;
   });
   board.replaceChildren(...cells, rainbow);
+  if (solved) {
+    board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
+    return;
+  }
   if (showBlocks) describeBoard(current);
   if (answerMethod === 'input') {
     supply.setAttribute('aria-label', '数字入力');
     const form = makeAnswerForm(current);
     supply.replaceChildren(form);
     setInputEnabled(true);
-    form.focus({ preventScroll: true });
+    if (focus) form.focus({ preventScroll: true });
     return;
   }
   supply.setAttribute('aria-label', showBlocks
@@ -252,7 +266,7 @@ function begin(total: number) {
   const choices = current.choices.map(quantity => makeChoice(current, quantity));
   supply.replaceChildren(...choices);
   setInputEnabled(true);
-  choices[0].focus({ preventScroll: true });
+  if (focus) choices[0].focus({ preventScroll: true });
 }
 
 async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[], correct: boolean) {
@@ -304,6 +318,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     };
     phase = 'choosing';
     setInputEnabled(true);
+    applyAnswerMethod();
     return false;
   }
 
@@ -345,7 +360,8 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   next.hidden = false;
   if (blocks.length) burst(effects, result, 10);
   playSound('success');
-  next.focus({ preventScroll: true });
+  applyAnswerMethod();
+  if (!settings.open) next.focus({ preventScroll: true });
 }
 
 function startMode(button: HTMLButtonElement, total: number, candidates?: number[]) {
@@ -360,6 +376,22 @@ playTen.addEventListener('click', () => {
   if (game.hidden) startMode(playTen, mainTotal);
 });
 
+function makeModeCard(play: HTMLButtonElement, favoriteIndex?: number) {
+  const card = document.createElement('div');
+  card.className = 'mode-card';
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'utility edit-total';
+  edit.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m4 16-1 5 5-1L21 7l-4-4zM14 6l4 4"/></svg>';
+  edit.addEventListener('click', () => openTotalEditor(card, favoriteIndex));
+  card.append(play, edit);
+  return card;
+}
+
+const randomCard = makeModeCard(playRandom);
+randomCard.lastElementChild!.setAttribute('aria-label', 'ランダムの かずを かえる');
+modes.append(randomCard);
+
 const favoriteButtons = favoriteTotals.map((_, index) => {
   const button = document.createElement('button');
   button.type = 'button';
@@ -367,7 +399,7 @@ const favoriteButtons = favoriteTotals.map((_, index) => {
   button.addEventListener('click', () => {
     if (game.hidden) startMode(button, favoriteTotals[index]);
   });
-  modes.insertBefore(button, playRandom);
+  modes.insertBefore(makeModeCard(button, index), randomCard);
   return button;
 });
 
@@ -376,6 +408,7 @@ function showFavorites() {
     const total = favoriteTotals[index];
     const { number, pieces } = makeNumberDisplay(total, 'blue');
     button.replaceChildren(number, pieces);
+    button.nextElementSibling!.setAttribute('aria-label', total + ' の カードを かえる');
     button.setAttribute('aria-label', operation === 'subtraction' ? total + ' から ひく' : total + ' を つくる');
   });
 }
@@ -391,45 +424,81 @@ function showRandomMode() {
 }
 
 playRandom.addEventListener('click', () => {
-  if (game.hidden) startMode(playRandom, drawTotal(randomTotals), randomTotals);
+  if (game.hidden) startMode(playRandom, drawTotal(randomTotals), [...randomTotals]);
 });
 
-function setupTotalSelectors(
-  group: string,
-  totals: number[],
-  apply: (totals: readonly number[]) => void,
-  excluded?: number,
-) {
-  const selectors = element(group).querySelectorAll('select');
-  function refresh() {
-    selectors.forEach((select, index) => {
-      select.value = String(totals[index]);
-      for (const option of select.options) {
-        const total = Number(option.value);
-        option.disabled = total === excluded || (total !== totals[index] && totals.includes(total));
-      }
-    });
-  }
-
-  selectors.forEach((select, index) => {
-    select.append(...selectableTotals.map(total => new Option(String(total), String(total))));
-    select.addEventListener('change', () => {
-      totals[index] = Number(select.value);
-      refresh();
-      apply(totals);
-    });
-  });
-  refresh();
+function positionTotalEditor(card: HTMLElement) {
+  const { clientWidth: width, clientHeight: height } = document.documentElement;
+  const bounds = card.getBoundingClientRect();
+  const gap = 16;
+  const edge = 12;
+  const above = bounds.top - gap;
+  const below = height - bounds.bottom - gap;
+  const placeAbove = above >= below;
+  const editorWidth = editor.offsetWidth;
+  const center = bounds.left + bounds.width / 2;
+  const left = Math.max(edge, Math.min(center - editorWidth / 2, width - editorWidth - edge));
+  editor.dataset.side = placeAbove ? 'above' : 'below';
+  editor.style.left = left + 'px';
+  editor.style.setProperty('--editor-arrow', center - left + 'px');
+  editor.style.setProperty('--editor-anchor', (placeAbove ? height - above : bounds.bottom + gap) + 'px');
+  editor.style.setProperty('--editor-height', Math.max(0, Math.max(above, below) - edge) + 'px');
 }
 
-setupTotalSelectors('favorite-settings', favoriteTotals, totals => {
-  saveFavoriteTotals(totals);
-  showFavorites();
-}, mainTotal);
-setupTotalSelectors('random-settings', randomTotals, totals => {
-  saveRandomTotals(totals);
-  showRandomMode();
-});
+function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
+  const random = favoriteIndex === undefined;
+  element('editor-title').textContent = random
+    ? `あそびたい かずを ${minRandomTotals} ～ ${maxRandomTotals} つ えらんでね`
+    : 'あそびたい かずを えらんでね';
+  editorCount.hidden = !random;
+  const buttons = selectableTotals.map(total => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'utility';
+    button.textContent = String(total);
+    button.addEventListener('click', () => {
+      if (button.getAttribute('aria-disabled') === 'true') return;
+      if (random) {
+        randomTotals = randomTotals.includes(total)
+          ? randomTotals.filter(candidate => candidate !== total)
+          : [...randomTotals, total].sort((a, b) => a - b);
+        saveRandomTotals(randomTotals);
+        showRandomMode();
+      } else {
+        favoriteTotals[favoriteIndex] = total;
+        saveFavoriteTotals(favoriteTotals);
+        showFavorites();
+      }
+      refresh();
+    });
+    return button;
+  });
+
+  function refresh() {
+    buttons.forEach((button, index) => {
+      const total = selectableTotals[index];
+      const pressed = random ? randomTotals.includes(total) : total === favoriteTotals[favoriteIndex];
+      const unavailable = random
+        ? randomTotals.length === (pressed ? minRandomTotals : maxRandomTotals)
+        : total === mainTotal || (!pressed && favoriteTotals.includes(total));
+      button.setAttribute('aria-pressed', String(pressed));
+      button.setAttribute('aria-disabled', String(unavailable));
+    });
+    if (random) editorCount.textContent = `${randomTotals.length} つ えらんだよ`;
+  }
+
+  editorNumbers.replaceChildren(...buttons);
+  refresh();
+  card.classList.add('editing');
+  editor.showModal();
+  const reposition = () => positionTotalEditor(card);
+  reposition();
+  window.addEventListener('resize', reposition);
+  editor.addEventListener('close', () => {
+    card.classList.remove('editing');
+    window.removeEventListener('resize', reposition);
+  }, { once: true });
+}
 
 home.addEventListener('click', () => {
   round = undefined;
@@ -439,14 +508,13 @@ home.addEventListener('click', () => {
   document.body.classList.remove('playing');
   home.hidden = true;
   score.hidden = true;
-  settingsOpen.hidden = false;
   title.hidden = false;
   activeMode?.focus({ preventScroll: true });
   applyOfflineUpdate?.();
 });
 
 settingsOpen.addEventListener('click', () => {
-  answerOptions.forEach(option => { option.checked = option.value === answerMethod; });
+  showAnswerOptions();
   settings.showModal();
   settings.querySelector<HTMLInputElement>('input:checked')?.focus();
 });
@@ -454,16 +522,45 @@ settingsOpen.addEventListener('click', () => {
 settings.addEventListener('change', event => {
   const option = event.target;
   if (option instanceof HTMLInputElement && option.checked && isAnswerMethod(option.value)) {
-    answerMethod = option.value;
-    saveAnswerMethod(answerMethod);
+    setAnswerMethod(option.value);
   }
 });
 
-sound.addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
+function showAnswerOptions() {
+  answerOptions.forEach(option => { option.checked = option.value === answerMethod; });
+}
+
+function applyAnswerMethod() {
+  if (round && phase !== 'animating' && game.dataset.method !== answerMethod) {
+    showAnswerMethod(round);
+  }
+}
+
+function setAnswerMethod(method: AnswerMethod) {
+  answerMethod = method;
+  saveAnswerMethod(method);
+  applyAnswerMethod();
+}
+
+function setSound(enabled: boolean) {
+  soundEnabled = enabled;
   enableSound(soundEnabled);
   saveSound(soundEnabled);
   showSound();
+}
+
+sound.addEventListener('click', () => setSound(!soundEnabled));
+element('reset-open').addEventListener('click', () => resetSettings.showModal());
+element('reset-confirm').addEventListener('click', () => {
+  setAnswerMethod(defaultAnswerMethod);
+  showAnswerOptions();
+  setSound(defaultSound);
+  favoriteTotals = [...defaultFavoriteTotals];
+  randomTotals = [...defaultRandomTotals];
+  saveFavoriteTotals(favoriteTotals);
+  saveRandomTotals(randomTotals);
+  showFavorites();
+  showRandomMode();
 });
 
 next.addEventListener('click', () => {

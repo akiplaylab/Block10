@@ -40,9 +40,6 @@
           <circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
-      <button id="sound" class="utility sound" type="button" aria-label="おと" aria-pressed="true">
-        <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">ON</span>
-      </button>
     </header>
     <main>
       <section id="title" class="title-screen">
@@ -88,10 +85,13 @@
         </div>
       </section>
     </main>
-    <dialog id="settings" aria-labelledby="settings-title">
+    <dialog id="settings" class="settings-dialog" aria-labelledby="settings-title">
       <h2 id="settings-title">せってい</h2>
+      <button id="sound" class="utility sound" type="button" aria-label="おと" aria-pressed="true">
+        <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">ON</span>
+      </button>
       <fieldset>
-        <legend>回答方法</legend>
+        <legend>こたえかた</legend>
         <label class="answer-option">
           <input type="radio" name="answer-method" value="blocks">
           <span>ブロックつき</span>
@@ -103,7 +103,7 @@
         </label>
         <label class="answer-option">
           <input type="radio" name="answer-method" value="choices">
-          <span>数字せんたく</span>
+          <span>数字をえらぶ</span>
           <span class="method-preview" aria-hidden="true">
             <span>3 + ? = 8</span>
             <span class="preview-choices"><b>4</b><b>5</b><b>6</b></span>
@@ -111,29 +111,35 @@
         </label>
         <label class="answer-option">
           <input type="radio" name="answer-method" value="input">
-          <span>数字入力</span>
+          <span>数字を入力する</span>
           <span class="method-preview" aria-hidden="true">
             <span>3 + ? = 8</span>
             <span class="preview-input">5</span>
           </span>
         </label>
       </fieldset>
-      <fieldset id="favorite-settings" class="total-settings">
-        <legend>お気に入り</legend>
-        <div class="total-selectors">
-          <label>左 <select aria-label="左のお気に入り"></select></label>
-          <label>右 <select aria-label="右のお気に入り"></select></label>
-        </div>
-      </fieldset>
-      <fieldset id="random-settings" class="total-settings">
-        <legend>ランダム出題</legend>
-        <div class="total-selectors">
-          <label>候補 1 <select aria-label="ランダムの候補 1"></select></label>
-          <label>候補 2 <select aria-label="ランダムの候補 2"></select></label>
-          <label>候補 3 <select aria-label="ランダムの候補 3"></select></label>
-        </div>
-      </fieldset>
       <form method="dialog"><button id="settings-close" class="utility" type="submit">とじる</button></form>
+      <button id="reset-open" type="button">はじめの せっていに もどす</button>
+    </dialog>
+    <dialog id="reset-settings" class="settings-dialog" aria-labelledby="reset-title" aria-describedby="reset-note">
+      <h2 id="reset-title">はじめの せっていに もどす？</h2>
+      <p id="reset-note">あそんだ きろくは きえないよ。</p>
+      <form method="dialog">
+        <button class="utility" type="submit" autofocus>いいえ</button>
+        <button id="reset-confirm" class="utility" type="submit">はい</button>
+      </form>
+    </dialog>
+    <dialog id="total-editor" class="settings-dialog" aria-labelledby="editor-title">
+      <div class="editor-panel">
+        <div class="editor-heading">
+          <h2 id="editor-title"></h2>
+          <p id="editor-count" role="status" hidden></p>
+        </div>
+        <div class="editor-options">
+          <div id="editor-numbers" class="editor-numbers" role="group" aria-labelledby="editor-title"></div>
+        </div>
+        <form method="dialog"><button class="utility" type="submit" autofocus>とじる</button></form>
+      </div>
     </dialog>
     <div id="effects" aria-hidden="true"></div>
     <script type="module" src="/src/main.ts"></script>
