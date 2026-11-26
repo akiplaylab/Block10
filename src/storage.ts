@@ -75,7 +75,7 @@ export function saveFavoriteTotals(totals: readonly number[]) {
 }
 
 export function saveRandomTotals(totals: readonly number[]) {
-  saveTotals(randomTotalsKey, totals);
+  if (parseRandomTotals(totals)) saveTotals(randomTotalsKey, totals);
 }
 
 function saveTotals(key: string, totals: readonly number[]) {

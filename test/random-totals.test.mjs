@@ -14,11 +14,11 @@ test('ランダム出題は各候補に同じ幅の乱数区間を割り当て�
   }
   assert.deepEqual([...counts], candidates.map(total => [total, drawsPerCandidate]));
   assert.equal(drawTotal([], () => 0), undefined);
+  assert.equal(drawTotal([9], () => 0.99), 9);
 });
 
 test('保存値の個数、範囲、重複を検証する', () => {
   assert.deepEqual(parseTotalSelection(defaultFavoriteTotals, 2, mainTotal), [5, 20]);
-  assert.deepEqual(parseTotalSelection(defaultRandomTotals, 3), [5, 15, 20]);
   assert.deepEqual(parseTotalSelection([2, 10, 20], 3), [2, 10, 20]);
   for (const value of [[1, 20], [2, 21], [2, 2], [2.5, 20], ['2', 20], [2], [2, 10, 20]]) {
     assert.equal(parseTotalSelection(value, 2, mainTotal), undefined);
@@ -32,14 +32,16 @@ test('旧範囲設定は限定ランダムの保存値として扱わない', ()
     { preset: 'standard', max: 20, kind: 'all' },
     { active: { preset: 'custom', min: 2, max: 30, step: 5 } },
   ]) {
-    assert.deepEqual(parseTotalSelection(value, 3) ?? defaultRandomTotals, [5, 15, 20]);
+    assert.deepEqual(parseRandomTotals(value) ?? defaultRandomTotals, [5, 10]);
   }
 });
 
-test('ランダム出題の保存値は重複のない 2〜3 種類を受け入れる', () => {
+test('ランダム出題の保存値は重複のない 1〜3 種類を受け入れる', () => {
+  assert.deepEqual(parseRandomTotals([5]), [5]);
   assert.deepEqual(parseRandomTotals([2, 20]), [2, 20]);
-  assert.deepEqual(parseRandomTotals(defaultRandomTotals), [5, 15, 20]);
-  for (const value of [[5], [2, 5, 10, 20], [5, 5], [2, 5, 5], [1, 20], [2, 21]]) {
+  assert.deepEqual(parseRandomTotals([5, 15, 20]), [5, 15, 20]);
+  assert.deepEqual(parseRandomTotals(defaultRandomTotals), [5, 10]);
+  for (const value of [[], [2, 5, 10, 20], [5, 5], [2, 5, 5], [1, 20], [2, 21]]) {
     assert.equal(parseRandomTotals(value), undefined);
   }
 });
