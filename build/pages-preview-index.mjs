@@ -16,7 +16,7 @@ await writeFile(`${directory}/index.html`, `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>テスト環境一覧 · ブロック 10</title>
+<title>テスト環境一覧 · Block10</title>
 <main>
   <h1>テスト環境一覧</h1>
   ${links.length ? `<ul>\n    ${links.join('\n    ')}\n  </ul>` : '<p>公開中のテスト環境はありません。</p>'}

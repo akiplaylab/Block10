@@ -88,17 +88,12 @@ function showFeedback(message?: typeof feedbackMessage) {
 
 function showLanguage() {
   document.documentElement.lang = language;
-  document.title = t('title');
   languageSelect.value = language;
   document.querySelectorAll<HTMLElement>('[data-text]').forEach(node => {
     node.textContent = t(node.dataset.text as Message);
   });
   document.querySelectorAll<HTMLElement>('[data-label]').forEach(node => {
     node.setAttribute('aria-label', t(node.dataset.label as Message));
-  });
-  const logoLetters = t('logo').split('|');
-  document.querySelectorAll('.logo span').forEach((letter, index) => {
-    letter.textContent = logoLetters[index];
   });
   randomCard.lastElementChild!.setAttribute('aria-label', t('editRandom'));
   showSound();

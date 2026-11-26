@@ -201,7 +201,7 @@ main { position: relative; height: 100%; }
 .logo span:nth-child(2) { color: #e38106; }
 .logo span:nth-child(3) { color: #228e64; }
 .logo span:nth-child(4) { color: #147fce; transform: rotate(4deg); }
-.logo strong { color: #8c49cf; font-size: 1.35em; margin-left: .09em; }
+.logo strong { color: #8c49cf; font-size: 1.35em; margin-left: .025em; }
 
 .primary {
   padding: .1em 1.25em;

@@ -1,12 +1,12 @@
-# Block 10
+# Block10
 
 [English](README.md) | [日本語](README.ja.md)
 
-Block 10 is an addition and subtraction game that helps kids build number skills through play.
+Block10 is an addition and subtraction game that helps kids build number skills through play.
 
-[![Play Block 10. Under a rainbow, 7 + ? = 10 appears above seven blue blocks and three orange blocks.](public/ogp.en.png)](https://akiplaylab.github.io/block10/)
+[![Play Block10. Under a rainbow, 7 + ? = 10 appears above seven blue blocks and three orange blocks.](public/ogp.png)](https://akiplaylab.github.io/block10/)
 
-**[Play Block 10](https://akiplaylab.github.io/block10/)**
+**[Play Block10](https://akiplaylab.github.io/block10/)**
 
 ## Documentation
 

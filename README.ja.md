@@ -1,12 +1,12 @@
-# ブロック 10
+# Block10
 
 [English](README.md) | [日本語](README.ja.md)
 
-ブロック 10 は、数の組み合わせを楽しく学び、計算力の土台をつくる足し算・引き算ゲームです。
+Block10 は、数の組み合わせを楽しく学び、計算力の土台をつくる足し算・引き算ゲームです。
 
-[![ブロック10であそぶ。虹の下に「7 + ? = 10」の式と青7個・オレンジ3個のブロック](public/ogp.png)](https://akiplaylab.github.io/block10/)
+[![Block10 であそぶ。虹の下に「7 + ? = 10」の式と青7個・オレンジ3個のブロック](public/ogp.png)](https://akiplaylab.github.io/block10/)
 
-**[ブロック 10 であそぶ](https://akiplaylab.github.io/block10/)**
+**[Block10 であそぶ](https://akiplaylab.github.io/block10/)**
 
 ## ドキュメント
 
