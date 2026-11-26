@@ -546,14 +546,6 @@ main { position: relative; height: 100%; }
 
 #ten-blocks .block { aspect-ratio: 1; }
 
-body[data-operation="subtraction"] #ten-blocks .orange::after {
-  content: "";
-  position: absolute;
-  inset: 44% 25%;
-  border-radius: 999px;
-  background: #793a0e;
-}
-
 #play-ten {
   min-width: min(57vw, 290px);
   font-size: clamp(23px, 5vh, 42px);
