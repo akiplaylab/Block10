@@ -5,7 +5,7 @@ import { blocksPerRow, classifyInput, createQuestionSource, equationFor, recordA
 import { initializeOffline } from './offline';
 import { renderOperator } from './operator-symbol';
 import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, selectableTotals } from './random-totals';
-import { defaultAnswerMethod, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
+import { defaultAnswerMethod, defaultOperation, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T;
@@ -15,14 +15,16 @@ const title = element('title');
 const applyOfflineUpdate = initializeOffline(title);
 const game = element('game');
 const modes = element('modes');
-const operations = title.querySelectorAll<HTMLInputElement>('input[name="operation"]');
 const tenBlocks = element('ten-blocks');
 const playTen = element<HTMLButtonElement>('play-ten');
 const playRandom = element<HTMLButtonElement>('play-random');
 const home = element<HTMLButtonElement>('home');
 const settingsOpen = element<HTMLButtonElement>('settings-open');
 const settings = element<HTMLDialogElement>('settings');
+const operationSettings = element<HTMLFieldSetElement>('operation-settings');
+const operations = settings.querySelectorAll<HTMLInputElement>('input[name="operation"]');
 const answerOptions = settings.querySelectorAll<HTMLInputElement>('input[name="answer-method"]');
+const resetOpen = element<HTMLButtonElement>('reset-open');
 const resetSettings = element<HTMLDialogElement>('reset-settings');
 const editor = element<HTMLDialogElement>('total-editor');
 const editorNumbers = element('editor-numbers');
@@ -69,6 +71,14 @@ function showScore() {
 function showOperation() {
   operations.forEach(option => { option.checked = option.value === operation; });
   document.body.dataset.operation = operation;
+  const preview = equationFor({ total: 8, known: 3 }, operation);
+  settings.querySelectorAll('[data-preview-first]').forEach(term => { term.textContent = String(preview.first); });
+  settings.querySelectorAll('[data-preview-operator]').forEach(term => { term.textContent = preview.symbol; });
+  settings.querySelectorAll('[data-preview-result]').forEach(term => { term.textContent = String(preview.result); });
+  settings.querySelectorAll('.preview-tiles .slot').forEach(tile => {
+    tile.classList.toggle('block', operation === 'subtraction');
+    tile.classList.toggle('orange', operation === 'subtraction');
+  });
   const known = 7;
   const missing = mainTotal - known;
   const { first, symbol, result } = equationFor({ total: mainTotal, known }, operation);
@@ -528,9 +538,9 @@ home.addEventListener('click', () => {
 });
 
 settingsOpen.addEventListener('click', () => {
+  operationSettings.hidden = resetOpen.hidden = !!round;
   showAnswerOptions();
   settings.showModal();
-  settings.querySelector<HTMLInputElement>('input:checked')?.focus();
 });
 
 settings.addEventListener('change', event => {
@@ -564,8 +574,11 @@ function setSound(enabled: boolean) {
 }
 
 sound.addEventListener('click', () => setSound(!soundEnabled));
-element('reset-open').addEventListener('click', () => resetSettings.showModal());
+resetOpen.addEventListener('click', () => {
+  if (!round) resetSettings.showModal();
+});
 element('reset-confirm').addEventListener('click', () => {
+  if (round) return;
   setAnswerMethod(defaultAnswerMethod);
   showAnswerOptions();
   setSound(defaultSound);
@@ -573,7 +586,7 @@ element('reset-confirm').addEventListener('click', () => {
   randomTotals = [...defaultRandomTotals];
   saveFavoriteTotals(favoriteTotals);
   saveRandomTotals(randomTotals);
-  showFavorites();
+  setOperation(defaultOperation);
   showRandomMode();
 });
 
@@ -585,11 +598,16 @@ next.addEventListener('click', () => {
   if (round && phase === 'complete') advanceRound(round);
 });
 
+function setOperation(value: Operation) {
+  if (round) return;
+  operation = value;
+  saveOperation(operation);
+  showOperation();
+}
+
 operations.forEach(option => {
   option.addEventListener('change', () => {
-    operation = option.value === 'subtraction' ? 'subtraction' : 'addition';
-    saveOperation(operation);
-    showOperation();
+    if (option.checked) setOperation(option.value === 'subtraction' ? 'subtraction' : 'addition');
   });
 });
 

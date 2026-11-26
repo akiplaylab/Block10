@@ -11,11 +11,13 @@ const favoriteTotalsKey = `${storagePrefix}.favoriteTotals`;
 const randomTotalsKey = `${storagePrefix}.randomTotals`;
 const operationKey = `${storagePrefix}.operation`;
 
+export const defaultOperation: Operation = 'addition';
+
 export function readOperation(): Operation {
   try {
-    return localStorage.getItem(operationKey) === 'subtraction' ? 'subtraction' : 'addition';
+    return localStorage.getItem(operationKey) === 'subtraction' ? 'subtraction' : defaultOperation;
   } catch {
-    return 'addition';
+    return defaultOperation;
   }
 }
 
