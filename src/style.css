@@ -348,8 +348,15 @@ main { position: relative; height: 100%; }
 }
 .result span { color: #f5a51a; font-size: .75em; }
 
-.flyer { transform-origin: top left; }
-.flyer { position: fixed; animation: fly 210ms cubic-bezier(.24,.78,.24,1) both; }
+.flyer {
+  --flight-duration: 210ms;
+  position: fixed;
+  transform-origin: center;
+  animation:
+    fly-position var(--flight-duration) cubic-bezier(.24,.78,.24,1) both,
+    fly-grow var(--flight-duration) ease-in-out both;
+}
+body[data-operation="subtraction"] .flyer { animation-name: fly-position, fly-shrink; }
 .land { animation: pop 230ms ease-out both; }
 .celebrate { animation: pop 370ms ease-out both; }
 .flash .cell { animation: flash 155ms ease-in-out both; }
@@ -361,9 +368,17 @@ main { position: relative; height: 100%; }
   animation: burst 670ms ease-out both;
 }
 
-@keyframes fly {
-  from { transform: translate(0, 0); }
-  to { transform: translate(var(--dx), var(--dy)) scale(var(--sx), var(--sy)); }
+@keyframes fly-position {
+  from { translate: 0 0; }
+  to { translate: var(--dx) var(--dy); }
+}
+@keyframes fly-grow {
+  from { scale: 1; }
+  30%, to { scale: var(--sx) var(--sy); }
+}
+@keyframes fly-shrink {
+  from, 70% { scale: 1; }
+  to { scale: var(--sx) var(--sy); }
 }
 @keyframes pop {
   0%, 100% { transform: scale(1); }

@@ -34,8 +34,8 @@ export async function fly(effects: HTMLElement, source: HTMLElement, destination
   flyer.style.top = `${from.top}px`;
   flyer.style.width = `${from.width}px`;
   flyer.style.height = `${from.height}px`;
-  flyer.style.setProperty('--dx', `${to.left - from.left}px`);
-  flyer.style.setProperty('--dy', `${to.top - from.top}px`);
+  flyer.style.setProperty('--dx', `${to.left + to.width / 2 - (from.left + from.width / 2)}px`);
+  flyer.style.setProperty('--dy', `${to.top + to.height / 2 - (from.top + from.height / 2)}px`);
   flyer.style.setProperty('--sx', String(to.width / from.width));
   flyer.style.setProperty('--sy', String(to.height / from.height));
   effects.append(flyer);
