@@ -1,11 +1,12 @@
 import './style.css';
+import { isLanguage, translate, type Message } from './i18n';
 import { enableSound, playSound } from './audio';
 import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, classifyInput, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
 import { renderOperator } from './operator-symbol';
 import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, selectableTotals } from './random-totals';
-import { defaultAnswerMethod, defaultOperation, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
+import { defaultAnswerMethod, defaultOperation, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readLanguage, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveLanguage, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T;
@@ -30,6 +31,7 @@ const editor = element<HTMLDialogElement>('total-editor');
 const editorNumbers = element('editor-numbers');
 const editorCount = element('editor-count');
 const editorEmptyNote = element('editor-empty-note');
+const languageSelect = element<HTMLSelectElement>('language');
 const sound = element<HTMLButtonElement>('sound');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
@@ -57,11 +59,64 @@ let soundEnabled = readSound();
 let answerMethod = readAnswerMethod();
 let favoriteTotals = readFavoriteTotals();
 let randomTotals = readRandomTotals();
+let language = readLanguage();
+let feedbackMessage: 'tooMany' | 'tooFew' | undefined;
 let clearTrial: (() => void) | undefined;
+
+function t(key: Message, values?: Record<string, string | number>) {
+  return translate(language, key, values);
+}
+
+function totalLabel(total: number) {
+  return t(operation === 'subtraction' ? 'subtractTotal' : 'makeTotal', { total });
+}
+
+function quantityLabel(quantity: number) {
+  return t(quantity === 1 ? 'oneBlock' : 'quantity', { quantity });
+}
+
+function supplyLabel() {
+  if (game.dataset.method === 'input') return t('keypad');
+  if (game.dataset.method === 'choices') return t('answerChoices');
+  return t(operation === 'subtraction' ? 'removeBlocks' : 'addBlocks');
+}
+
+function showFeedback(message?: typeof feedbackMessage) {
+  feedbackMessage = message;
+  feedback.textContent = message ? t(message) : '';
+}
+
+function showLanguage() {
+  document.documentElement.lang = language;
+  languageSelect.value = language;
+  document.querySelectorAll<HTMLElement>('[data-text]').forEach(node => {
+    node.textContent = t(node.dataset.text as Message);
+  });
+  document.querySelectorAll<HTMLElement>('[data-label]').forEach(node => {
+    node.setAttribute('aria-label', t(node.dataset.label as Message));
+  });
+  randomCard.lastElementChild!.setAttribute('aria-label', t('editRandom'));
+  showSound();
+  showOperation();
+  showRandomMode();
+  if (!round) return;
+
+  showFeedback(feedbackMessage);
+  if (board.classList.contains('merged')) {
+    board.setAttribute('aria-label', t('rainbow', { number: rainbow.textContent ?? '' }));
+  } else if (!board.hidden) {
+    describeBoard(round);
+  }
+  supply.setAttribute('aria-label', supplyLabel());
+  supply.querySelector('.keypad')?.setAttribute('aria-label', t('keypad'));
+  supply.querySelectorAll<HTMLElement>('[data-quantity]').forEach(button => {
+    button.setAttribute('aria-label', quantityLabel(Number(button.dataset.quantity)));
+  });
+}
 
 function showSound() {
   sound.setAttribute('aria-pressed', String(soundEnabled));
-  element('sound-state').textContent = soundEnabled ? 'ON' : 'OFF';
+  element('sound-state').textContent = soundEnabled ? t('on') : t('off');
 }
 
 function showScore() {
@@ -88,9 +143,9 @@ function showOperation() {
   tenBlocks.replaceChildren(...Array.from({ length: mainTotal }, (_, index) =>
     makeBlock(index < known ? 'blue' : 'orange')));
   tenBlocks.setAttribute('aria-label', operation === 'subtraction'
-    ? `あお ${known}こを のこす、オレンジ ${missing}こを とる`
-    : `あお ${known}こに オレンジ ${missing}こを たす`);
-  playTen.setAttribute('aria-label', operation === 'subtraction' ? `${mainTotal} から ひく` : `${mainTotal} を つくる`);
+    ? t('subtractPreview', { known, missing })
+    : t('addPreview', { known, missing }));
+  playTen.setAttribute('aria-label', totalLabel(mainTotal));
   showFavorites();
 }
 
@@ -131,7 +186,8 @@ function makeChoice(current: ComplementRound, quantity: number) {
       block.classList.add('slot');
       if (operation === 'subtraction') block.classList.remove('block', 'orange');
     }
-    button.setAttribute('aria-label', quantity + 'こ');
+    button.dataset.quantity = String(quantity);
+    button.setAttribute('aria-label', quantityLabel(quantity));
   } else {
     button = document.createElement('button');
     button.type = 'button';
@@ -148,7 +204,7 @@ function makeKeypad(current: ComplementRound) {
   keypad.className = 'keypad';
   keypad.tabIndex = -1;
   keypad.setAttribute('role', 'group');
-  keypad.setAttribute('aria-label', '数字入力');
+  keypad.setAttribute('aria-label', t('keypad'));
   let value = '';
 
   function resetValue() {
@@ -202,8 +258,8 @@ function setInputEnabled(enabled: boolean) {
 
 function describeBoard(current: ComplementRound) {
   board.setAttribute('aria-label', operation === 'subtraction'
-    ? `ブロック ${current.total}こ、あおを ${current.known}こ のこそう`
-    : `あお ${current.known}こ、あき ${current.answer}マス`);
+    ? t('subtractBoard', { total: current.total, known: current.known })
+    : t('addBoard', { known: current.known, answer: current.answer }));
 }
 
 function boardCellClass(current: ComplementRound, index: number) {
@@ -223,7 +279,7 @@ function begin(total: number) {
   phase = 'choosing';
 
   effects.replaceChildren();
-  feedback.textContent = '';
+  showFeedback();
   overflow.replaceChildren();
   title.hidden = true;
   game.hidden = false;
@@ -263,22 +319,20 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
   });
   board.replaceChildren(...cells, rainbow);
   if (solved) {
-    board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
+    board.setAttribute('aria-label', t('rainbow', { number: rainbow.textContent ?? '' }));
     return;
   }
   second.textContent = '?';
   if (showBlocks) describeBoard(current);
   if (answerMethod === 'input') {
-    supply.setAttribute('aria-label', '数字入力');
+    supply.setAttribute('aria-label', t('keypad'));
     const keypad = makeKeypad(current);
     supply.replaceChildren(keypad);
     setInputEnabled(true);
     if (focus && !settings.open && !resetSettings.open) keypad.focus({ preventScroll: true });
     return;
   }
-  supply.setAttribute('aria-label', showBlocks
-    ? operation === 'subtraction' ? 'とるブロック' : 'おくブロック'
-    : 'こたえの せんたくし');
+  supply.setAttribute('aria-label', supplyLabel());
   const choices = current.choices.map(quantity => makeChoice(current, quantity));
   supply.replaceChildren(...choices);
   setInputEnabled(true);
@@ -329,7 +383,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   if (!correct) {
     playSound('incorrect');
     const extra = quantity - current.answer;
-    feedback.textContent = extra > 0 ? 'ちょっと おおいね' : 'ちょっと たりないね';
+    showFeedback(extra > 0 ? 'tooMany' : 'tooFew');
     if (blocks.length && operation === 'addition') {
       overflow.replaceChildren(...Array.from({ length: Math.max(0, extra) }, () => makeBlock('orange')));
     }
@@ -339,7 +393,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
       window.clearTimeout(timer);
       restoreBlocks?.();
       control.classList.remove('shake');
-      feedback.textContent = '';
+      showFeedback();
       overflow.replaceChildren();
       clearTrial = undefined;
     };
@@ -360,7 +414,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     board.classList.remove('flash');
     board.classList.add('merged');
     rainbow.hidden = false;
-    board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
+    board.setAttribute('aria-label', t('rainbow', { number: rainbow.textContent ?? '' }));
     burst(effects, board, 12);
   } else {
     equation.classList.add('flash');
@@ -413,7 +467,6 @@ function makeModeCard(play: HTMLButtonElement, favoriteIndex?: number) {
 }
 
 const randomCard = makeModeCard(playRandom);
-randomCard.lastElementChild!.setAttribute('aria-label', 'ランダムの かずを かえる');
 modes.append(randomCard);
 
 const favoriteButtons = favoriteTotals.map((_, index) => {
@@ -432,14 +485,14 @@ function showFavorites() {
     const total = favoriteTotals[index];
     const { number, pieces } = makeNumberDisplay(total, 'blue');
     button.replaceChildren(number, pieces);
-    button.nextElementSibling!.setAttribute('aria-label', total + ' の カードを かえる');
-    button.setAttribute('aria-label', operation === 'subtraction' ? total + ' から ひく' : total + ' を つくる');
+    button.nextElementSibling!.setAttribute('aria-label', t('editFavorite', { total }));
+    button.setAttribute('aria-label', totalLabel(total));
   });
 }
 
 function showRandomMode() {
   const candidates = [...randomTotals].sort((a, b) => a - b);
-  playRandom.setAttribute('aria-label', candidates.length ? 'ランダム ' + candidates.join('、') : 'ランダム');
+  playRandom.setAttribute('aria-label', candidates.length ? t('randomList', { numbers: candidates.join(t('numberSeparator')) }) : t('random'));
   element('random-chips').replaceChildren(...candidates.map(total => {
     const chip = document.createElement('span');
     chip.textContent = String(total);
@@ -507,7 +560,7 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
       button.setAttribute('aria-disabled', String(unavailable));
     });
     if (random) {
-      editorCount.textContent = `${randomTotals.length} / ${maxRandomTotals} つ せんたくちゅう`;
+      editorCount.textContent = t('editorCount', { count: randomTotals.length, max: maxRandomTotals });
       editorEmptyNote.classList.toggle('invisible', randomTotals.length > 0);
     }
   }
@@ -618,6 +671,12 @@ operations.forEach(option => {
   });
 });
 
-showSound();
-showOperation();
-showRandomMode();
+languageSelect.addEventListener('change', () => {
+  const selected = languageSelect.value;
+  if (!isLanguage(selected)) return;
+  language = selected;
+  saveLanguage(language);
+  showLanguage();
+});
+
+showLanguage();
