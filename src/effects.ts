@@ -23,11 +23,13 @@ export function burst(effects: HTMLElement, target: HTMLElement, count: number) 
   }
 }
 
-export function fly(effects: HTMLElement, source: HTMLElement, destination: HTMLElement) {
+export async function fly(effects: HTMLElement, source: HTMLElement, destination: HTMLElement) {
+  if (reduceMotion.matches) return;
+
   const from = source.getBoundingClientRect();
   const to = destination.getBoundingClientRect();
   const flyer = document.createElement('div');
-  flyer.className = 'flyer block orange';
+  flyer.className = source.classList.contains('blue') ? 'flyer block blue' : 'flyer block orange';
   flyer.style.left = `${from.left}px`;
   flyer.style.top = `${from.top}px`;
   flyer.style.width = `${from.width}px`;
@@ -37,7 +39,11 @@ export function fly(effects: HTMLElement, source: HTMLElement, destination: HTML
   flyer.style.setProperty('--sx', String(to.width / from.width));
   flyer.style.setProperty('--sy', String(to.height / from.height));
   effects.append(flyer);
-  return flyer;
+  try {
+    await Promise.allSettled(flyer.getAnimations().map(animation => animation.finished));
+  } finally {
+    flyer.remove();
+  }
 }
 
 export async function flyNumber(effects: HTMLElement, source: HTMLElement, destination: HTMLElement, value: string) {

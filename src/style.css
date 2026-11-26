@@ -683,6 +683,11 @@ body:has(#total-editor[open]) .mode-card.editing {
   box-shadow: inset 0 2px 4px #587bae40, inset 0 0 0 1.5px #9ab4d780;
 }
 
+.complement .slot:not(.block) {
+  border: 1.5px dashed #6b8bb6;
+  box-shadow: none;
+}
+
 .frame[data-total="5"] .rainbow-block {
   font-size: min(72px, calc(var(--cell) - 12px));
 }
@@ -690,9 +695,6 @@ body:has(#total-editor[open]) .mode-card.editing {
 .frame.merged .slot { visibility: hidden; }
 .frame.flash .slot { animation: flash 155ms ease-in-out both; }
 .slot.trial { opacity: .76; }
-.slot.removed { opacity: .18; }
-
-.choice.chosen .choice-pieces { opacity: 0; }
 .choice.shake { animation: shake 280ms ease-in-out; }
 
 @keyframes shake {
@@ -959,6 +961,7 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 .keypad button:last-child { grid-column: 2; }
 .keypad.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
+.complement[data-method="blocks"] #second { min-width: max(1em, 2ch); }
 .complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
 .number-flyer {
   position: fixed;

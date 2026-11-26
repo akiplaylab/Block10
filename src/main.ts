@@ -118,22 +118,28 @@ function makeNumberButton(quantity: number, color: 'orange' | 'blue') {
   button.type = 'button';
   button.className = 'choice';
   button.append(number, pieces);
-  return { button, blocks };
+  return { button, number, blocks };
 }
 
 function makeChoice(current: ComplementRound, quantity: number) {
   let button: HTMLButtonElement;
+  let number: HTMLElement;
   let blocks: HTMLElement[] = [];
   if (answerMethod === 'blocks') {
-    ({ button, blocks } = makeNumberButton(quantity, 'orange'));
+    ({ button, number, blocks } = makeNumberButton(quantity, 'orange'));
+    for (const block of blocks) {
+      block.classList.add('slot');
+      if (operation === 'subtraction') block.classList.remove('block', 'orange');
+    }
     button.setAttribute('aria-label', quantity + 'こ');
   } else {
     button = document.createElement('button');
     button.type = 'button';
     button.className = 'choice choice-number';
     button.textContent = String(quantity);
+    number = button;
   }
-  button.addEventListener('click', () => void choose(current, quantity, button, blocks));
+  button.addEventListener('click', () => void choose(current, quantity, button, blocks, number));
   return button;
 }
 
@@ -280,24 +286,31 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
 }
 
 async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[], correct: boolean) {
-  if (operation === 'subtraction') {
-    const removed = cells.slice(-blocks.length);
-    removed.forEach(cell => cell.classList.add('removed'));
-    await pause(210);
-    return () => removed.forEach(cell => cell.classList.remove('removed'));
-  }
-
-  const destinations = cells.slice(current.known, current.known + blocks.length);
-  const flyers = destinations.map((destination, index) => fly(effects, blocks[index], destination));
-  await pause(210);
-  flyers.forEach(flyer => flyer.remove());
+  const subtracting = operation === 'subtraction';
+  const boardBlocks = subtracting
+    ? cells.slice(-blocks.length).reverse()
+    : cells.slice(current.known, current.known + blocks.length);
+  const choiceBlocks = blocks.slice(0, boardBlocks.length);
+  const sources = subtracting ? boardBlocks : choiceBlocks;
+  const destinations = subtracting ? choiceBlocks : boardBlocks;
+  const sourceClasses = sources.map(source => source.className);
+  const landing = correct ? 'land' : 'trial';
+  const flights = sources.map((source, index) => fly(effects, source, destinations[index]));
+  sources.forEach(source => source.classList.remove('block', 'orange', 'blue'));
+  await Promise.all(flights);
   if (round === current) {
-    destinations.forEach(cell => cell.classList.add('block', 'orange', correct ? 'land' : 'trial'));
+    destinations.forEach((destination, index) => {
+      const color = sourceClasses[index].includes('blue') ? 'blue' : 'orange';
+      destination.classList.add('block', color, landing);
+    });
   }
-  return () => destinations.forEach(cell => { cell.className = 'slot'; });
+  return () => {
+    sources.forEach((source, index) => { source.className = sourceClasses[index]; });
+    destinations.forEach(destination => { destination.className = 'slot'; });
+  };
 }
 
-async function choose(current: ComplementRound, quantity: number, control: HTMLElement, blocks: HTMLElement[] = []) {
+async function choose(current: ComplementRound, quantity: number, control: HTMLElement, blocks: HTMLElement[] = [], number?: HTMLElement) {
   if (round !== current || phase !== 'choosing') return;
 
   const enteredOnKeypad = game.dataset.method === 'input';
@@ -306,8 +319,11 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   setInputEnabled(false);
   enableSound(soundEnabled);
   const correct = recordAttempt(current, quantity);
-  control.classList.add('chosen');
-  const restoreBlocks = blocks.length ? await showBlockAttempt(current, blocks, correct) : undefined;
+  if (correct && !blocks.length) playSound('place');
+  const [restoreBlocks] = await Promise.all([
+    blocks.length ? showBlockAttempt(current, blocks, correct) : undefined,
+    correct && number && flyNumber(effects, number, second, String(quantity)),
+  ]);
   if (round !== current) return;
 
   if (!correct) {
@@ -322,7 +338,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     clearTrial = () => {
       window.clearTimeout(timer);
       restoreBlocks?.();
-      control.classList.remove('chosen', 'shake');
+      control.classList.remove('shake');
       feedback.textContent = '';
       overflow.replaceChildren();
       clearTrial = undefined;
@@ -333,8 +349,10 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     return;
   }
 
-  playSound('place');
+  second.textContent = String(quantity);
+  second.classList.add('solved');
   if (blocks.length) {
+    playSound('place');
     board.classList.add('flash');
     await pause(155);
     if (round !== current) return;
@@ -345,13 +363,6 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
     burst(effects, board, 12);
   } else {
-    if (!enteredOnKeypad) {
-      await flyNumber(effects, control, second, String(quantity));
-      if (round !== current) return;
-    }
-
-    second.textContent = String(quantity);
-    second.classList.add('solved');
     equation.classList.add('flash');
   }
   playSound('ten');
@@ -363,10 +374,6 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   collected += 1;
   showScore();
   saveComplementCompletion(current, operation, !!randomCandidates);
-  if (blocks.length) {
-    second.textContent = String(quantity);
-    second.classList.add('solved');
-  }
   if (enteredOnKeypad) {
     playSound('success');
     advanceRound(current);
