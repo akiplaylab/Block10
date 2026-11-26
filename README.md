@@ -4,7 +4,7 @@
 
 [![ブロック10であそぶ。虹の下に「7 + ? = 10」の式と青7個・オレンジ3個のブロック](public/ogp.png)](https://akiplaylab.github.io/block10/)
 
-- [本番であそぶ](https://akiplaylab.github.io/block10/)
+**[ブロック 10 であそぶ](https://akiplaylab.github.io/block10/)**
 
 ## ドキュメント
 
