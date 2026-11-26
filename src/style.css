@@ -922,6 +922,7 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
   place-items: center;
 }
 
+.complement[data-method="input"] .turn { width: 100%; }
 .complement[data-method="input"] .supply { display: block; width: min(100%, 90vw, 320px); }
 .keypad {
   --key-height: clamp(44px, calc(10 * var(--viewport-unit, 1vh)), 84px);
