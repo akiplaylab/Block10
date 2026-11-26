@@ -348,8 +348,15 @@ main { position: relative; height: 100%; }
 }
 .result span { color: #f5a51a; font-size: .75em; }
 
-.flyer { transform-origin: top left; }
-.flyer { position: fixed; animation: fly 210ms cubic-bezier(.24,.78,.24,1) both; }
+.flyer {
+  --flight-duration: 210ms;
+  position: fixed;
+  transform-origin: center;
+  animation:
+    fly-position var(--flight-duration) cubic-bezier(.24,.78,.24,1) both,
+    fly-grow var(--flight-duration) ease-in-out both;
+}
+body[data-operation="subtraction"] .flyer { animation-name: fly-position, fly-shrink; }
 .land { animation: pop 230ms ease-out both; }
 .celebrate { animation: pop 370ms ease-out both; }
 .flash .cell { animation: flash 155ms ease-in-out both; }
@@ -361,9 +368,17 @@ main { position: relative; height: 100%; }
   animation: burst 670ms ease-out both;
 }
 
-@keyframes fly {
-  from { transform: translate(0, 0); }
-  to { transform: translate(var(--dx), var(--dy)) scale(var(--sx), var(--sy)); }
+@keyframes fly-position {
+  from { translate: 0 0; }
+  to { translate: var(--dx) var(--dy); }
+}
+@keyframes fly-grow {
+  from { scale: 1; }
+  30%, to { scale: var(--sx) var(--sy); }
+}
+@keyframes fly-shrink {
+  from, 70% { scale: 1; }
+  to { scale: var(--sx) var(--sy); }
 }
 @keyframes pop {
   0%, 100% { transform: scale(1); }
@@ -683,6 +698,11 @@ body:has(#total-editor[open]) .mode-card.editing {
   box-shadow: inset 0 2px 4px #587bae40, inset 0 0 0 1.5px #9ab4d780;
 }
 
+.complement .slot:not(.block) {
+  border: 1.5px dashed #6b8bb6;
+  box-shadow: none;
+}
+
 .frame[data-total="5"] .rainbow-block {
   font-size: min(72px, calc(var(--cell) - 12px));
 }
@@ -690,9 +710,6 @@ body:has(#total-editor[open]) .mode-card.editing {
 .frame.merged .slot { visibility: hidden; }
 .frame.flash .slot { animation: flash 155ms ease-in-out both; }
 .slot.trial { opacity: .76; }
-.slot.removed { opacity: .18; }
-
-.choice.chosen .choice-pieces { opacity: 0; }
 .choice.shake { animation: shake 280ms ease-in-out; }
 
 @keyframes shake {
@@ -959,6 +976,7 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 .keypad button:last-child { grid-column: 2; }
 .keypad.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
+.complement[data-method="blocks"] #second { min-width: max(1em, 2ch); }
 .complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
 .number-flyer {
   position: fixed;
