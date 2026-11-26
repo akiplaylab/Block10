@@ -4,7 +4,7 @@ import { burst, fly, flyNumber, pause } from './effects';
 import { blocksPerRow, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
 import { renderOperator } from './operator-symbol';
-import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, minRandomTotals, selectableTotals } from './random-totals';
+import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, selectableTotals } from './random-totals';
 import { defaultAnswerMethod, defaultSound, isAnswerMethod, readAnswerMethod, readFavoriteTotals, readOperation, readRandomTotals, readSound, saveAnswerMethod, saveComplementCompletion, saveFavoriteTotals, saveOperation, saveRandomTotals, saveSound, type AnswerMethod } from './storage';
 
 function element<T extends HTMLElement = HTMLElement>(id: string) {
@@ -26,6 +26,7 @@ const resetSettings = element<HTMLDialogElement>('reset-settings');
 const editor = element<HTMLDialogElement>('total-editor');
 const editorNumbers = element('editor-numbers');
 const editorCount = element('editor-count');
+const editorEmptyNote = element('editor-empty-note');
 const sound = element<HTMLButtonElement>('sound');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
@@ -415,7 +416,7 @@ function showFavorites() {
 
 function showRandomMode() {
   const candidates = [...randomTotals].sort((a, b) => a - b);
-  playRandom.setAttribute('aria-label', 'ランダム ' + candidates.join('、'));
+  playRandom.setAttribute('aria-label', candidates.length ? 'ランダム ' + candidates.join('、') : 'ランダム');
   element('random-chips').replaceChildren(...candidates.map(total => {
     const chip = document.createElement('span');
     chip.textContent = String(total);
@@ -424,7 +425,7 @@ function showRandomMode() {
 }
 
 playRandom.addEventListener('click', () => {
-  if (game.hidden) startMode(playRandom, drawTotal(randomTotals), [...randomTotals]);
+  if (game.hidden && randomTotals.length) startMode(playRandom, drawTotal(randomTotals), [...randomTotals]);
 });
 
 function positionTotalEditor(card: HTMLElement) {
@@ -447,10 +448,8 @@ function positionTotalEditor(card: HTMLElement) {
 
 function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
   const random = favoriteIndex === undefined;
-  element('editor-title').textContent = random
-    ? `あそびたい かずを ${minRandomTotals} ～ ${maxRandomTotals} つ えらんでね`
-    : 'あそびたい かずを えらんでね';
   editorCount.hidden = !random;
+  editorEmptyNote.hidden = !random;
   const buttons = selectableTotals.map(total => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -479,12 +478,15 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
       const total = selectableTotals[index];
       const pressed = random ? randomTotals.includes(total) : total === favoriteTotals[favoriteIndex];
       const unavailable = random
-        ? randomTotals.length === (pressed ? minRandomTotals : maxRandomTotals)
+        ? !pressed && randomTotals.length === maxRandomTotals
         : total === mainTotal || (!pressed && favoriteTotals.includes(total));
       button.setAttribute('aria-pressed', String(pressed));
       button.setAttribute('aria-disabled', String(unavailable));
     });
-    if (random) editorCount.textContent = `${randomTotals.length} つ えらんだよ`;
+    if (random) {
+      editorCount.textContent = `${randomTotals.length} / ${maxRandomTotals} つ せんたくちゅう`;
+      editorEmptyNote.classList.toggle('invisible', randomTotals.length > 0);
+    }
   }
 
   editorNumbers.replaceChildren(...buttons);
@@ -495,6 +497,11 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
   reposition();
   window.addEventListener('resize', reposition);
   editor.addEventListener('close', () => {
+    if (random && !randomTotals.length) {
+      randomTotals = [...defaultRandomTotals];
+      saveRandomTotals(randomTotals);
+      showRandomMode();
+    }
     card.classList.remove('editing');
     window.removeEventListener('resize', reposition);
   }, { once: true });

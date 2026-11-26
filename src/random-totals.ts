@@ -1,7 +1,7 @@
 export const mainTotal = 10;
 export const selectableTotals = Array.from({ length: 19 }, (_, index) => index + 2);
 export const defaultFavoriteTotals = [5, 20] as const;
-export const defaultRandomTotals = [5, 15, 20] as const;
+export const defaultRandomTotals = [5, 10] as const;
 
 export function parseTotalSelection(value: unknown, count: number, excluded?: number): number[] | undefined {
   if (!Array.isArray(value) || value.length !== count || new Set(value).size !== count) return;
@@ -9,11 +9,11 @@ export function parseTotalSelection(value: unknown, count: number, excluded?: nu
   return value;
 }
 
-export const minRandomTotals = 2;
 export const maxRandomTotals = 3;
 
 export function parseRandomTotals(value: unknown) {
-  return parseTotalSelection(value, minRandomTotals) ?? parseTotalSelection(value, maxRandomTotals);
+  if (!Array.isArray(value) || value.length < 1 || value.length > maxRandomTotals) return;
+  return parseTotalSelection(value, value.length);
 }
 
 export function drawTotal(candidates: readonly number[], random = Math.random) {
