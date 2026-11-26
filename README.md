@@ -52,3 +52,9 @@ GitHub Actions は `main` を本番 URL に公開し、同じリポジトリか�
 1. PR の作成や更新後に、Actions の「Deploy to GitHub Pages」で公開結果を確認します。
 2. テスト環境一覧から対象の PR を開き、`TEST · PR #番号 · 短縮SHA` が確認対象のコミットと一致していることを確かめてからプレイします。
 3. 受け入れ後は GitHub で PR を手動マージし、本番 URL を確認します。
+
+## ライセンス
+
+Block10 は [MIT License](LICENSE) のもとで公開されています。
+
+配布物に含まれる Vite のポリフィルの著作権表示とライセンスは [第三者ライセンス通知](public/THIRD-PARTY-NOTICES.txt) に記載しています。
