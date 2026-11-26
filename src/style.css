@@ -160,8 +160,8 @@ header {
 }
 
 #home span { font-size: 1.45em; line-height: 1; }
-#settings-open { min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
-.sound { margin-left: auto; min-width: 5.4em; }
+#settings-open { margin-left: auto; min-width: max(44px, var(--control)); min-height: 44px; padding: 0; }
+.sound { min-width: 5.4em; margin-bottom: 12px; }
 .speaker {
   width: 1.12em;
   height: 1.15em;
@@ -554,6 +554,20 @@ main { position: relative; height: 100%; }
   width: min(94vw, 460px);
 }
 
+.mode-card {
+  display: grid;
+  justify-items: stretch;
+  min-width: 0;
+  gap: 5px;
+}
+
+.edit-total {
+  justify-self: end;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
 .modes .choice, .complement .supply .choice {
   display: grid;
   grid-template-rows: var(--choice-number-size) 1fr;
@@ -747,7 +761,7 @@ main { position: relative; height: 100%; }
   pointer-events: none;
 }
 
-#settings {
+.settings-dialog {
   width: min(calc(100% - 24px), 420px);
   max-height: calc(100% - 24px);
   padding: clamp(12px, 4vw, 22px);
@@ -759,28 +773,39 @@ main { position: relative; height: 100%; }
   touch-action: pan-y;
 }
 
-body:has(#settings[open]) { touch-action: pan-y; }
-#settings::backdrop { background: #21376270; }
-#settings h2 { margin: 0 0 8px; font-size: 1.2rem; }
+body:has(.settings-dialog[open]) { touch-action: pan-y; }
+.settings-dialog::backdrop { background: #21376270; }
+.settings-dialog h2 { margin: 0 0 8px; font-size: 1.2rem; }
 #settings fieldset { display: grid; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
 #settings legend { margin-bottom: 6px; font-size: .95rem; }
-#settings form { margin-top: 10px; }
-#settings form[method="dialog"] { text-align: right; }
+.settings-dialog form { margin-top: 10px; }
+.settings-dialog form[method="dialog"] { text-align: right; }
 
-#settings .total-settings { margin-top: 12px; }
-.total-selectors { display: flex; gap: 8px; font-size: .85rem; }
-.total-selectors label { flex: 1; min-width: 0; }
-.total-selectors select {
+#reset-open {
   display: block;
-  width: 100%;
+  margin: 10px 0 0;
   min-height: 44px;
-  padding: 4px 8px;
-  border: 1px solid #9ab4d7;
-  border-radius: 8px;
-  background: white;
-  color: inherit;
+  padding: 0 4px;
+  background: transparent;
+  border: 0;
+  color: #425a80;
   font: inherit;
+  font-size: .85rem;
+  text-decoration: underline;
 }
+
+.editor-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  gap: 7px;
+}
+
+.editor-numbers .utility { min-height: 44px; padding: 0; }
+.editor-numbers [aria-pressed="true"] {
+  background: #315aa2;
+  color: white;
+}
+.settings-dialog button:disabled { opacity: .5; cursor: default; }
 
 .answer-option {
   display: grid;

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createQuestionSource, equationFor, recordAttempt } from '../src/complement.ts';
-import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, parseTotalSelection, selectableTotals } from '../src/random-totals.ts';
+import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, parseRandomTotals, parseTotalSelection, selectableTotals } from '../src/random-totals.ts';
 
 test('ランダム出題は各候補に同じ幅の乱数区間を割り当てる', () => {
   const candidates = defaultRandomTotals;
@@ -33,6 +33,14 @@ test('旧範囲設定は限定ランダムの保存値として扱わない', ()
     { active: { preset: 'custom', min: 2, max: 30, step: 5 } },
   ]) {
     assert.deepEqual(parseTotalSelection(value, 3) ?? defaultRandomTotals, [5, 15, 20]);
+  }
+});
+
+test('ランダム出題の保存値は重複のない 2〜3 種類を受け入れる', () => {
+  assert.deepEqual(parseRandomTotals([2, 20]), [2, 20]);
+  assert.deepEqual(parseRandomTotals(defaultRandomTotals), [5, 15, 20]);
+  for (const value of [[5], [2, 5, 10, 20], [5, 5], [2, 5, 5], [1, 20], [2, 21]]) {
+    assert.equal(parseRandomTotals(value), undefined);
   }
 });
 

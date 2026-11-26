@@ -1,5 +1,5 @@
 import type { ComplementRound, Operation } from './complement';
-import { defaultFavoriteTotals, defaultRandomTotals, mainTotal, parseTotalSelection } from './random-totals';
+import { defaultFavoriteTotals, defaultRandomTotals, mainTotal, parseRandomTotals, parseTotalSelection } from './random-totals';
 
 const preview = /\/test\/(pr-\d+)\/$/.exec(import.meta.env.BASE_URL)?.[1];
 const storagePrefix = import.meta.env.MODE === 'pages-test'
@@ -29,6 +29,9 @@ export function saveOperation(operation: Operation) {
 
 export type AnswerMethod = 'blocks' | 'choices' | 'input';
 
+export const defaultAnswerMethod: AnswerMethod = 'blocks';
+export const defaultSound = true;
+
 export function isAnswerMethod(value: unknown): value is AnswerMethod {
   return value === 'blocks' || value === 'choices' || value === 'input';
 }
@@ -36,9 +39,9 @@ export function isAnswerMethod(value: unknown): value is AnswerMethod {
 export function readAnswerMethod(): AnswerMethod {
   try {
     const value = localStorage.getItem(answerMethodKey);
-    return isAnswerMethod(value) ? value : 'blocks';
+    return isAnswerMethod(value) ? value : defaultAnswerMethod;
   } catch {
-    return 'blocks';
+    return defaultAnswerMethod;
   }
 }
 
@@ -51,17 +54,17 @@ export function saveAnswerMethod(method: AnswerMethod) {
 }
 
 export function readFavoriteTotals() {
-  return readTotals(favoriteTotalsKey, defaultFavoriteTotals, mainTotal);
+  return readTotals(favoriteTotalsKey, defaultFavoriteTotals, value => parseTotalSelection(value, defaultFavoriteTotals.length, mainTotal));
 }
 
 export function readRandomTotals() {
-  return readTotals(randomTotalsKey, defaultRandomTotals);
+  return readTotals(randomTotalsKey, defaultRandomTotals, parseRandomTotals);
 }
 
-function readTotals(key: string, defaults: readonly number[], excluded?: number) {
+function readTotals(key: string, defaults: readonly number[], parse: (value: unknown) => number[] | undefined) {
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(key) ?? 'null');
-    return parseTotalSelection(saved, defaults.length, excluded) ?? [...defaults];
+    return parse(saved) ?? [...defaults];
   } catch {
     return [...defaults];
   }
@@ -85,9 +88,10 @@ function saveTotals(key: string, totals: readonly number[]) {
 
 export function readSound() {
   try {
-    return localStorage.getItem(soundKey) !== 'off';
+    const value = localStorage.getItem(soundKey);
+    return value === null ? defaultSound : value !== 'off';
   } catch {
-    return true;
+    return defaultSound;
   }
 }
 
