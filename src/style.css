@@ -888,7 +888,6 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 .preview-tiles, .preview-choices, .preview-choices b { display: flex; align-items: center; gap: 2px; }
 .method-preview i { width: 7px; height: 7px; box-shadow: none; }
 .preview-choices b, .preview-input { padding: 2px 4px; border-radius: 4px; background: #ffedcb; color: #9c4709; }
-.preview-input { min-width: 28px; text-align: center; border: 1px solid #9ab4d7; background: white; }
 
 .complement:is([data-method="choices"], [data-method="input"]) {
   grid-template-areas: "equation" "feedback" "turn" "actions";
@@ -923,30 +922,23 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
   place-items: center;
 }
 
-.complement[data-method="input"] .supply { display: block; width: min(94vw, 260px); }
-.answer-form {
-  --key-height: 44px;
-  --display-font-size: 26px;
+.complement[data-method="input"] .supply { display: block; width: min(100%, 90vw, 320px); }
+.keypad {
+  --key-height: clamp(44px, calc(10 * var(--viewport-unit, 1vh)), 84px);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
+  gap: 6px;
 }
-.answer-form output {
-  display: grid;
-  place-items: center;
-  grid-column: 1 / -1;
+.keypad button {
+  width: auto;
+  height: var(--key-height);
   min-height: var(--key-height);
-  border: 2px solid #9ab4d7;
+  padding: 0;
   border-radius: 12px;
-  background: #f5fbff;
-  color: #213762;
-  font: 900 var(--display-font-size) / 1 system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
+  font-size: clamp(24px, min(7vw, 5vh), 46px);
 }
-
-.answer-form button { width: auto; height: var(--key-height); min-height: var(--key-height); padding: 0; border-radius: 12px; }
-.answer-form button[type="submit"] { grid-column: span 2; background: #e1d8ff; color: #4f3d93; }
-.answer-form.shake { animation: shake 280ms ease-in-out; }
+.keypad button:last-child { grid-column: 2; }
+.keypad.shake { animation: shake 280ms ease-in-out; }
 .equation.flash { animation: flash 155ms ease-in-out both; }
 .complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
 .number-flyer {
@@ -961,13 +953,10 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
   .complement[data-method="input"] .supply {
     width: min(52vw, calc(60 * var(--viewport-unit, 1vh)), 500px);
   }
-  .answer-form {
-    --key-height: clamp(44px, calc(12 * var(--viewport-unit, 1vh) - 18px), 84px);
-    --key-font-size: min(5vw, calc(5 * var(--viewport-unit, 1vh)), 46px);
-    --display-font-size: calc(1.15 * var(--key-font-size));
+  .keypad {
+    --key-height: clamp(60px, calc(12 * var(--viewport-unit, 1vh)), 100px);
     gap: clamp(5px, 1vh, 10px);
   }
-  .answer-form button { font-size: var(--key-font-size); }
 }
 
 @media (orientation: landscape) and (max-height: 480px) {
@@ -976,5 +965,4 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   }
   .complement[data-method="input"] .supply { width: min(100%, 360px); }
-  .answer-form { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
