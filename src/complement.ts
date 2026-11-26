@@ -14,6 +14,12 @@ export function recordAttempt(round: ComplementRound, selected: number) {
   return correct;
 }
 
+export function classifyInput(input: string, answer: number) {
+  const expected = String(answer);
+  if (input === expected) return 'correct';
+  return expected.startsWith(input) ? 'prefix' : 'incorrect';
+}
+
 function shuffle<T>(values: readonly T[], random: () => number) {
   const shuffled = [...values];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {

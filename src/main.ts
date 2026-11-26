@@ -1,7 +1,7 @@
 import './style.css';
 import { enableSound, playSound } from './audio';
 import { burst, fly, flyNumber, pause } from './effects';
-import { blocksPerRow, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
+import { blocksPerRow, classifyInput, createQuestionSource, equationFor, recordAttempt, type ComplementRound, type Operation } from './complement';
 import { initializeOffline } from './offline';
 import { renderOperator } from './operator-symbol';
 import { defaultFavoriteTotals, defaultRandomTotals, drawTotal, mainTotal, maxRandomTotals, selectableTotals } from './random-totals';
@@ -119,30 +119,31 @@ function makeChoice(current: ComplementRound, quantity: number) {
   return button;
 }
 
-function makeAnswerForm(current: ComplementRound) {
-  const form = document.createElement('form');
-  form.className = 'answer-form';
-  form.tabIndex = -1;
-  form.setAttribute('aria-label', '数字入力');
-  const display = document.createElement('output');
-  display.textContent = '?';
-  display.setAttribute('aria-label', 'こたえ');
-  form.append(display);
-
-  const maxDigits = String(current.total - 1).length;
+function makeKeypad(current: ComplementRound) {
+  const keypad = document.createElement('div');
+  keypad.className = 'keypad';
+  keypad.tabIndex = -1;
+  keypad.setAttribute('role', 'group');
+  keypad.setAttribute('aria-label', '数字入力');
   let value = '';
 
   function resetValue() {
     value = '';
-    display.textContent = '?';
+    second.textContent = '?';
   }
 
   function addDigit(digit: string) {
-    if (phase !== 'choosing') return;
-    if (value.length >= maxDigits) return;
+    if (round !== current || phase !== 'choosing') return;
     if (!value) clearTrial?.();
     value += digit;
-    display.textContent = value;
+    const classification = classifyInput(value, current.answer);
+    if (classification === 'prefix') {
+      second.textContent = value;
+      return;
+    }
+    const quantity = Number(value);
+    if (classification === 'incorrect') resetValue();
+    void choose(current, quantity, keypad);
   }
 
   for (const digit of '1234567890') {
@@ -151,20 +152,10 @@ function makeAnswerForm(current: ComplementRound) {
     key.className = 'utility';
     key.textContent = digit;
     key.addEventListener('click', () => addDigit(digit));
-    form.append(key);
+    keypad.append(key);
   }
 
-  const submit = document.createElement('button');
-  submit.type = 'submit';
-  submit.className = 'utility';
-  submit.textContent = 'OK';
-  form.append(submit);
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    if (!value) return;
-    if (await choose(current, Number(value), form) === false) resetValue();
-  });
-  form.addEventListener('keydown', event => {
+  keypad.addEventListener('keydown', event => {
     if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
     const key = event.key;
     if (/^[0-9]$/.test(key)) addDigit(key);
@@ -173,11 +164,10 @@ function makeAnswerForm(current: ComplementRound) {
         clearTrial?.();
         resetValue();
       }
-    } else if (key === 'Enter') form.requestSubmit();
-    else return;
+    } else return;
     event.preventDefault();
   });
-  return form;
+  return keypad;
 }
 
 function setInputEnabled(enabled: boolean) {
@@ -252,13 +242,14 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
     board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
     return;
   }
+  second.textContent = '?';
   if (showBlocks) describeBoard(current);
   if (answerMethod === 'input') {
     supply.setAttribute('aria-label', '数字入力');
-    const form = makeAnswerForm(current);
-    supply.replaceChildren(form);
+    const keypad = makeKeypad(current);
+    supply.replaceChildren(keypad);
     setInputEnabled(true);
-    if (focus) form.focus({ preventScroll: true });
+    if (focus && !settings.open && !resetSettings.open) keypad.focus({ preventScroll: true });
     return;
   }
   supply.setAttribute('aria-label', showBlocks
@@ -291,6 +282,7 @@ async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[],
 async function choose(current: ComplementRound, quantity: number, control: HTMLElement, blocks: HTMLElement[] = []) {
   if (round !== current || phase !== 'choosing') return;
 
+  const enteredOnKeypad = game.dataset.method === 'input';
   clearTrial?.();
   phase = 'animating';
   setInputEnabled(false);
@@ -320,7 +312,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     phase = 'choosing';
     setInputEnabled(true);
     applyAnswerMethod();
-    return false;
+    return;
   }
 
   playSound('place');
@@ -335,9 +327,10 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
     burst(effects, board, 12);
   } else {
-    const source = control.querySelector('output') ?? control;
-    await flyNumber(effects, source, second, source.textContent ?? String(quantity));
-    if (round !== current) return;
+    if (!enteredOnKeypad) {
+      await flyNumber(effects, control, second, String(quantity));
+      if (round !== current) return;
+    }
 
     second.textContent = String(quantity);
     second.classList.add('solved');
@@ -355,6 +348,11 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
   if (blocks.length) {
     second.textContent = String(quantity);
     second.classList.add('solved');
+  }
+  if (enteredOnKeypad) {
+    playSound('success');
+    advanceRound(current);
+    return;
   }
   supply.hidden = true;
   result.hidden = false;
@@ -510,6 +508,7 @@ function openTotalEditor(card: HTMLElement, favoriteIndex?: number) {
 home.addEventListener('click', () => {
   round = undefined;
   clearTrial?.();
+  second.textContent = '?';
   effects.replaceChildren();
   game.hidden = true;
   document.body.classList.remove('playing');
@@ -570,8 +569,12 @@ element('reset-confirm').addEventListener('click', () => {
   showRandomMode();
 });
 
+function advanceRound(current: ComplementRound) {
+  begin(randomCandidates ? drawTotal(randomCandidates) : current.total);
+}
+
 next.addEventListener('click', () => {
-  if (round && phase === 'complete') begin(randomCandidates ? drawTotal(randomCandidates) : round.total);
+  if (round && phase === 'complete') advanceRound(round);
 });
 
 operations.forEach(option => {
