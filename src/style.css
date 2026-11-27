@@ -183,25 +183,26 @@ main { position: relative; height: 100%; }
 
 .logo {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   margin: 0;
   font-size: min(14vw, 17vh, 120px);
-  font-weight: 1000;
-  letter-spacing: -.085em;
+  font-family: "Arial Rounded MT Bold", ui-rounded, "Arial Black", system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -.025em;
   line-height: 1.15;
   white-space: nowrap;
-  transform: translateX(-.04em) rotate(-5deg);
-  filter: drop-shadow(0 .055em 0 #657abd) drop-shadow(0 .10em .095em #5263ac55);
+  filter: drop-shadow(0 .055em 0 #6876b7) drop-shadow(0 .10em .075em #263f8355);
 }
 .logo span, .logo strong {
-  -webkit-text-stroke: .11em #fff;
+  -webkit-text-stroke: .14em #fff;
   paint-order: stroke fill;
 }
-.logo span:nth-child(1) { color: #eb4381; transform: rotate(-6deg) translateY(.05em); }
-.logo span:nth-child(2) { color: #e38106; }
-.logo span:nth-child(3) { color: #228e64; }
-.logo span:nth-child(4) { color: #147fce; transform: rotate(4deg); }
-.logo strong { color: #8c49cf; font-size: 1.35em; margin-left: .025em; }
+.logo span:nth-child(1) { color: #ed285d; transform: translateY(.07em) rotate(-10deg); }
+.logo span:nth-child(2) { color: #f5690b; transform: rotate(-6deg); }
+.logo span:nth-child(3) { color: #ffb900; }
+.logo span:nth-child(4) { color: #18a751; }
+.logo span:nth-child(5) { color: #087ae9; transform: rotate(4deg); }
+.logo strong { color: #883bd0; font-size: 1.08em; margin-inline-start: .07em; transform: translateY(.04em) rotate(5deg); }
 
 .primary {
   padding: .1em 1.25em;
