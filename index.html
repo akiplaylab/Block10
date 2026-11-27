@@ -1,27 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#83d7ff">
-    <meta name="apple-mobile-web-app-title" content="Block10">
-    <meta name="description" content="A math game that builds number skills through play.">
-    <meta property="og:title" content="Block10">
-    <meta property="og:description" content="A math game that builds number skills through play.">
+    <meta name="apple-mobile-web-app-title" content="ブロック 10">
+    <meta name="description" content="数の組み合わせを楽しく学び、計算力の土台をつくる算数学習ゲーム。">
+    <meta property="og:title" content="ブロック 10 | 遊んで学ぶ足し算・引き算">
+    <meta property="og:description" content="数の組み合わせを楽しく学び、計算力の土台をつくる算数学習ゲーム。">
     <meta property="og:type" content="website">
     <link rel="canonical" href="https://akiplaylab.github.io/block10/">
     <meta property="og:url" content="https://akiplaylab.github.io/block10/">
     <meta property="og:image" content="https://akiplaylab.github.io/block10/ogp.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Block10 above 7 + ? = 10, seven blue blocks, three orange blocks, and a pink Play button">
+    <meta property="og:image:alt" content="虹と雲を背景にした「ブロック 10」のロゴ、7 + ? = 10 の式、青7個とオレンジ3個のブロック、ピンクの「あそぶ」ボタン">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Block10">
-    <meta name="twitter:description" content="A math game that builds number skills through play.">
+    <meta name="twitter:title" content="ブロック 10 | 遊んで学ぶ足し算・引き算">
+    <meta name="twitter:description" content="数の組み合わせを楽しく学び、計算力の土台をつくる算数学習ゲーム。">
     <meta name="twitter:image" content="https://akiplaylab.github.io/block10/ogp.png">
+    <meta name="twitter:image:alt" content="虹と雲を背景にした「ブロック 10」のロゴ、7 + ? = 10 の式、青7個とオレンジ3個のブロック、ピンクの「あそぶ」ボタン">
     <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <title>Block10</title>
+    <title>ブロック 10 | 遊んで学ぶ足し算・引き算</title>
   </head>
   <body>
     <div class="scenery" aria-hidden="true">
@@ -32,9 +33,9 @@
       <span class="sky-star star-three">✦</span><span class="sky-star star-four">✦</span>
     </div>
     <header>
-      <button id="home" class="utility" type="button" hidden><span aria-hidden="true">⌂</span> <span data-text="home">Home</span></button>
+      <button id="home" class="utility" type="button" hidden><span aria-hidden="true">⌂</span> ホーム</button>
       <div id="score" class="score" aria-live="polite" hidden></div>
-      <button id="settings-open" class="utility" type="button" aria-label="Settings" data-label="settings">
+      <button id="settings-open" class="utility" type="button" aria-label="せってい">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
           <path d="M10 2h4l.6 2.5 2.1 1.2 2.5-.7 2 3.5-1.9 1.8v2.4l1.9 1.8-2 3.5-2.5-.7-2.1 1.2L14 21h-4l-.6-2.5-2.1-1.2-2.5.7-2-3.5 1.9-1.8v-2.4L2.8 8.5l2-3.5 2.5.7 2.1-1.2z" transform="translate(0 .5)"/>
           <circle cx="12" cy="12" r="3"/>
@@ -43,27 +44,27 @@
     </header>
     <main>
       <section id="title" class="title-screen">
-        <h1 class="logo" aria-label="Block10">
-          <span aria-hidden="true">B</span><span aria-hidden="true">l</span><span aria-hidden="true">o</span><span aria-hidden="true">ck</span><strong aria-hidden="true">10</strong>
+        <h1 class="logo" aria-label="ブロック 10">
+          <span aria-hidden="true">ブ</span><span aria-hidden="true">ロ</span><span aria-hidden="true">ッ</span><span aria-hidden="true">ク</span><strong aria-hidden="true">10</strong>
         </h1>
         <div class="main-mode">
           <div class="ten-preview">
             <span id="preview-first"></span> <span id="preview-operator"></span> <span>?</span> <span data-operator="="></span> <span id="preview-result"></span>
           </div>
           <div id="ten-blocks" role="img"></div>
-          <button id="play-ten" class="primary" type="button"><span data-text="play">Play</span></button>
+          <button id="play-ten" class="primary" type="button" aria-label="10 で あそぶ">あそぶ</button>
         </div>
         <div class="other-modes">
-          <p id="other-modes-label"><span data-text="otherModes">Play with other numbers</span></p>
+          <p id="other-modes-label">ほかの かずで あそぶ</p>
           <div id="modes" class="modes" role="group" aria-labelledby="other-modes-label">
             <button id="play-random" class="choice" type="button">
-              <span data-text="random">Random</span>
+              <span>ランダム</span>
               <span id="random-chips" aria-hidden="true"></span>
             </button>
           </div>
         </div>
       </section>
-      <section id="game" class="game-screen complement" aria-label="Block10" hidden>
+      <section id="game" class="game-screen complement" aria-label="ブロック 10" hidden>
         <div class="equation" aria-live="polite" aria-atomic="true">
           <span id="first"></span> <span id="operator"></span> <span id="second"></span> <span data-operator="="></span> <span id="answer">?</span>
         </div>
@@ -74,30 +75,30 @@
         </div>
         <div class="turn">
           <div id="supply" class="supply"></div>
-          <div id="result" class="result" hidden><span aria-hidden="true">✦</span> <span data-text="success">You did it!</span> <span aria-hidden="true">✦</span></div>
+          <div id="result" class="result" hidden><span aria-hidden="true">✦</span> できた！ <span aria-hidden="true">✦</span></div>
         </div>
         <div class="actions">
-          <button id="next" class="primary" type="button" hidden><span data-text="next">Next</span></button>
+          <button id="next" class="primary" type="button" hidden>つぎへ</button>
         </div>
       </section>
     </main>
     <dialog id="settings" class="settings-dialog" aria-labelledby="settings-title">
-      <h2 id="settings-title"><span data-text="settings">Settings</span></h2>
-      <button id="sound" class="utility sound" type="button" aria-label="Sound" data-label="sound" aria-pressed="true">
-        <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">ON</span>
+      <h2 id="settings-title">せってい</h2>
+      <button id="sound" class="utility sound" type="button" aria-label="おと" aria-pressed="true">
+        <span class="speaker" aria-hidden="true"></span><span id="sound-state" aria-hidden="true">オン</span>
       </button>
       <fieldset id="operation-settings">
-        <legend><span data-text="operation">Math</span></legend>
+        <legend>けいさん</legend>
         <div class="operations">
-          <label><input type="radio" name="operation" value="addition" checked><span class="operation-option"><span data-operator="+" aria-hidden="true"></span><span data-text="addition">Add</span></span></label>
-          <label><input type="radio" name="operation" value="subtraction"><span class="operation-option"><span data-operator="−" aria-hidden="true"></span><span data-text="subtraction">Subtract</span></span></label>
+          <label><input type="radio" name="operation" value="addition" checked><span class="operation-option"><span data-operator="+" aria-hidden="true"></span>たしざん</span></label>
+          <label><input type="radio" name="operation" value="subtraction"><span class="operation-option"><span data-operator="−" aria-hidden="true"></span>ひきざん</span></label>
         </div>
       </fieldset>
       <fieldset>
-        <legend><span data-text="answerMethod">How to answer</span></legend>
+        <legend>こたえかた</legend>
         <label class="answer-option">
           <input type="radio" name="answer-method" value="blocks">
-          <span data-text="blocks">Use blocks</span>
+          <span>ブロックつき</span>
           <span class="method-preview" aria-hidden="true">
             <span><span data-preview-first></span> <span data-preview-operator></span> ? = <span data-preview-result></span></span>
             <span class="preview-tiles"><i class="block blue"></i><i class="block blue"></i><i class="block blue"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i></span>
@@ -106,7 +107,7 @@
         </label>
         <label class="answer-option">
           <input type="radio" name="answer-method" value="choices">
-          <span data-text="choices">Pick a number</span>
+          <span>数字をえらぶ</span>
           <span class="method-preview" aria-hidden="true">
             <span><span data-preview-first></span> <span data-preview-operator></span> ? = <span data-preview-result></span></span>
             <span class="preview-choices"><b>4</b><b>5</b><b>6</b></span>
@@ -114,43 +115,40 @@
         </label>
         <label class="answer-option">
           <input type="radio" name="answer-method" value="input">
-          <span data-text="input">Type a number</span>
+          <span>数字を入力する</span>
           <span class="method-preview" aria-hidden="true">
             <span><span data-preview-first></span> <span data-preview-operator></span> <b class="preview-input">5</b> = <span data-preview-result></span></span>
           </span>
         </label>
       </fieldset>
-      <label class="language-setting"><span data-text="language">Language</span>
-        <select id="language"><option value="en" lang="en">English</option><option value="ja" lang="ja">日本語</option></select>
-      </label>
-      <form method="dialog"><button id="settings-close" class="utility" type="submit"><span data-text="close">Close</span></button></form>
-      <button id="reset-open" type="button"><span data-text="reset">Reset settings</span></button>
+      <form method="dialog"><button id="settings-close" class="utility" type="submit">とじる</button></form>
+      <button id="reset-open" type="button">はじめの せっていに もどす</button>
       <p id="offline-ready" class="offline-ready" role="status" hidden>
         <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M2 8.5a16 16 0 0 1 3-2M9 5a16 16 0 0 1 13 3.5M5 12.5a11 11 0 0 1 4-2M14 10.2a11 11 0 0 1 5 2.3M8.5 16a5.5 5.5 0 0 1 5.5-1.2M12 20h.01M3 3l18 18"/>
         </svg>
-        <span data-text="offline">You can play Block10 offline</span>
+        <span>ブロック 10 は<br>インターネットが なくても あそべます</span>
       </p>
     </dialog>
     <dialog id="reset-settings" class="settings-dialog" aria-labelledby="reset-title" aria-describedby="reset-note">
-      <h2 id="reset-title"><span data-text="resetTitle">Reset settings?</span></h2>
-      <p id="reset-note"><span data-text="resetNote">Your play history stays.</span></p>
+      <h2 id="reset-title">はじめの せっていに もどす？</h2>
+      <p id="reset-note">あそんだ きろくは きえないよ。</p>
       <form method="dialog">
-        <button class="utility" type="submit" autofocus><span data-text="no">No</span></button>
-        <button id="reset-confirm" class="utility" type="submit"><span data-text="yes">Yes</span></button>
+        <button class="utility" type="submit" autofocus>いいえ</button>
+        <button id="reset-confirm" class="utility" type="submit">はい</button>
       </form>
     </dialog>
     <dialog id="total-editor" class="settings-dialog" aria-labelledby="editor-title">
       <div class="editor-panel">
         <div class="editor-heading">
-          <h2 id="editor-title"><span data-text="editorTitle">Choose numbers to play with</span></h2>
+          <h2 id="editor-title">あそびたい かずを えらんでね</h2>
           <p id="editor-count" role="status" hidden></p>
         </div>
         <div class="editor-options">
           <div id="editor-numbers" class="editor-numbers" role="group" aria-labelledby="editor-title"></div>
         </div>
-        <p id="editor-empty-note" hidden><span data-text="editorEmpty">Close with no numbers selected to go back to 5 and 10.</span></p>
-        <form method="dialog"><button class="utility" type="submit" autofocus><span data-text="close">Close</span></button></form>
+        <p id="editor-empty-note" hidden>えらばずに とじると、5 と 10 に もどるよ。</p>
+        <form method="dialog"><button class="utility" type="submit" autofocus>とじる</button></form>
       </div>
     </dialog>
     <div id="effects" aria-hidden="true"></div>

@@ -1,10 +1,10 @@
-# Block10
+# ブロック 10
 
-Block10 は、数の組み合わせを楽しく学び、計算力の土台をつくる足し算・引き算ゲームです。
+ブロック 10 は、数の組み合わせを楽しく学び、計算力の土台をつくる足し算・引き算ゲームです。
 
-[![Block10 であそぶ。虹の下に「7 + ? = 10」の式と青7個・オレンジ3個のブロック](public/ogp.png)](https://akiplaylab.github.io/block10/)
+[![ブロック 10 であそぶ。虹の下に「7 + ? = 10」の式と青7個・オレンジ3個のブロック](public/ogp.png)](https://akiplaylab.github.io/block10/)
 
-**[Block10 であそぶ](https://akiplaylab.github.io/block10/)**
+**[ブロック 10 であそぶ](https://akiplaylab.github.io/block10/)**
 
 ## ドキュメント
 
@@ -15,6 +15,6 @@ Block10 は、数の組み合わせを楽しく学び、計算力の土台をつ
 
 ## ライセンス
 
-Block10 は [MIT License](LICENSE) のもとで公開されています。
+ブロック 10 は [MIT License](LICENSE) のもとで公開されています。
 
 配布物に含まれる Vite のポリフィルの著作権表示とライセンスは [第三者ライセンス通知](public/THIRD-PARTY-NOTICES.txt) に記載しています。
