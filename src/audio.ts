@@ -2,7 +2,6 @@ const notes = {
   place: [523.25, 659.25],
   incorrect: [440, 329.63],
   ten: [523.25, 659.25, 783.99, 1046.5],
-  success: [659.25, 783.99, 1046.5, 1318.51],
 };
 
 let context: AudioContext | undefined;

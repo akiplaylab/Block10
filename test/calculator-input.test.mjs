@@ -3,15 +3,15 @@ import test from 'node:test';
 import { classifyInput } from '../src/complement.ts';
 
 test('exact answers complete on the last digit', () => {
-  assert.equal(classifyInput('4', 4), 'correct');
-  assert.equal(classifyInput('1', 1), 'correct');
-  assert.equal(classifyInput('13', 13), 'correct');
-  assert.equal(classifyInput('10', 10), 'correct');
+  for (let answer = 1; answer < 20; answer += 1) {
+    assert.equal(classifyInput(String(answer), answer), 'correct');
+  }
 });
 
 test('a matching first digit waits for the second digit', () => {
-  assert.equal(classifyInput('1', 13), 'prefix');
-  assert.equal(classifyInput('1', 10), 'prefix');
+  for (let answer = 10; answer < 20; answer += 1) {
+    assert.equal(classifyInput('1', answer), 'prefix');
+  }
 });
 
 test('mismatches are rejected at either digit', () => {
