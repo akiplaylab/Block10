@@ -1,14 +1,12 @@
-# Educational philosophy
+# 教育理念
 
-[English](Philosophy.md) | [日本語](Philosophy.ja.md)
+Block10 は、学習者の理解と計算力を伸ばすための教育ツールです。
 
-Block10 is an educational tool that helps learners deepen their understanding and build their calculation skills.
-
-- We give immediate feedback on correct and incorrect answers and treat mistakes as part of learning. Learners can try as many times as they like without losing points or being penalized. Repeated practice gives them many opportunities to learn.
-- We make learning itself fun. Learners can decide when to play without unrelated rewards, streaks, or quotas pushing them to continue.
-- Learners practice different ways to make a fixed total so the problems feel manageable. They explore the same number combinations through addition and subtraction to become familiar with how parts make up a whole. Random problems add some variety.
-- We focus on improving the learning experience within the current range of problems. Making the game harder, extending sessions, or expanding the range are secondary to that goal. Simple settings and controls reduce the mental effort required from learners and their parents or caregivers.
-- Learners and their parents or caregivers can use learning data to reflect on practice. A future statistics screen will focus on how much learners have practiced, such as the number of answers given, and will avoid grading them by accuracy or number of mistakes.
-- Working with number combinations up to 20, groups of ten, and carrying builds a foundation for learners to enjoy learning on their own beyond Block10. We respect each learner's time and independence. Building enough skill to move on from Block10 is a success in its own right.
-- We make use of the strengths of numbers, colors, shapes, symbols, and words to create a welcoming design that even first-time learners can understand intuitively. Reducing text or interactions and streamlining the design are not goals in themselves; these changes should not come at the expense of clarity, warmth, or the joy of play. We consider reading words a natural part of the learning experience.
-- We see multilingual support as a way to bring the learning experience to more learners. We prioritize natural, clear, and welcoming experiences in each language over uniformity across languages or ease of translation. Rather than rushing to add languages, we focus our development resources on improving the quality of the existing learning experience.
+- 正解・不正解をその場で伝え、間違いを学習の一部として扱います。減点や罰を設けず、安心して何度でも挑戦できるようにし、反復を通じて多くの学習経験を積むことを重視します。
+- 学ぶこと自体を楽しくし、学習と無関係な報酬、連続利用記録、ノルマで継続を強制しません。
+- 学習者が無理なく問題に取り組めるよう、全体の数を固定して数の組み合わせを楽しく反復します。同じ組み合わせを足し算と引き算の両方で扱い、全体と部分の関係に親しみます。ランダム出題は適度な変化を加えるために使います。
+- 難易度を上げることや学習時間を延ばすこと自体を目的とせず、出題範囲を広げるよりも、今の範囲での学習体験を充実させます。設定や操作をシンプルに保ち、学習者と保護者の双方の認知負荷を抑えます。
+- 学習データは、学習者本人や保護者が学習経験を振り返るために活用します。将来の統計画面では回答数などの学習量を中心に示し、正答率や不正答数による評価は行いません。
+- 合計が 20 までの数の組み合わせや、10 のまとまり、繰り上がりを学び、Block10 の外でも自分で楽しく学び続けるための土台をつくります。利用者の時間と自主性を尊重し、十分な計算力が身について Block10 から卒業することも成功と考えます。
+- 数字、色、図形、記号、言葉それぞれの特性を生かし、初めて利用する学習者にも直感的に理解できる、親しみやすい設計を目指します。文字や操作の削減、合理化そのものを目的とせず、理解しやすさ、温かみ、遊ぶ楽しさを損なわないようにします。言葉を読むことも自然な学習経験の一部と考えます。
+- 多言語対応は、より多くの学習者に学習体験を届けるための手段と考えます。言語間の共通化や翻訳の容易さよりも、それぞれの言語での自然さ、理解しやすさ、親しみやすさを優先します。対応言語の拡大を急がず、既存の学習体験の質の向上に開発リソースを集中させます。
