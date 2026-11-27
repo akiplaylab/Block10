@@ -34,6 +34,7 @@ const sound = element<HTMLButtonElement>('sound');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
 const score = element('score');
+const reward = element('reward');
 const result = element('result');
 const feedback = element('feedback');
 const overflow = element('overflow');
@@ -41,7 +42,6 @@ const first = element('first');
 const second = element('second');
 const effects = element('effects');
 const board = element('board');
-const equation = game.querySelector<HTMLElement>('.equation')!;
 const questions = new Map<number, ReturnType<typeof createQuestionSource>>();
 const rainbow = document.createElement('div');
 rainbow.className = 'rainbow-block';
@@ -148,6 +148,7 @@ function makeKeypad(current: ComplementRound) {
   keypad.tabIndex = -1;
   keypad.setAttribute('role', 'group');
   keypad.setAttribute('aria-label', 'すうじをいれる');
+  const keys = new Map<string, HTMLButtonElement>();
   let value = '';
 
   function resetValue() {
@@ -165,8 +166,8 @@ function makeKeypad(current: ComplementRound) {
       return;
     }
     const quantity = Number(value);
-    if (classification === 'incorrect') resetValue();
-    void choose(current, quantity, keypad);
+    resetValue();
+    void choose(current, quantity, keypad, [], keys.get(digit));
   }
 
   for (const digit of '1234567890') {
@@ -175,6 +176,7 @@ function makeKeypad(current: ComplementRound) {
     key.className = 'utility';
     key.textContent = digit;
     key.addEventListener('click', () => addDigit(digit));
+    keys.set(digit, key);
     keypad.append(key);
   }
 
@@ -241,7 +243,6 @@ function begin(total: number) {
   element('answer').textContent = String(terms.result);
   game.style.setProperty('--rows', String(Math.ceil(total / blocksPerRow)));
   board.dataset.total = String(total);
-  equation.classList.remove('flash');
   rainbow.textContent = String(terms.result);
   showAnswerMethod(current, true);
 }
@@ -249,22 +250,18 @@ function begin(total: number) {
 function showAnswerMethod(current: ComplementRound, focus = false) {
   clearTrial?.();
   game.dataset.method = answerMethod;
+  if (phase === 'complete') return;
+
   const showBlocks = answerMethod === 'blocks';
-  board.hidden = !showBlocks;
-  const solved = phase === 'complete';
-  board.classList.remove('flash');
-  board.classList.toggle('merged', solved);
-  rainbow.hidden = !solved;
+  reward.hidden = !showBlocks;
+  board.classList.remove('flash', 'merged');
+  rainbow.hidden = true;
   cells = Array.from({ length: showBlocks ? current.total : 0 }, (_, index) => {
     const cell = document.createElement('span');
     cell.className = boardCellClass(current, index);
     return cell;
   });
   board.replaceChildren(...cells, rainbow);
-  if (solved) {
-    board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
-    return;
-  }
   second.textContent = '?';
   if (showBlocks) describeBoard(current);
   if (answerMethod === 'input') {
@@ -312,7 +309,6 @@ async function showBlockAttempt(current: ComplementRound, blocks: HTMLElement[],
 async function choose(current: ComplementRound, quantity: number, control: HTMLElement, blocks: HTMLElement[] = [], number?: HTMLElement) {
   if (round !== current || phase !== 'choosing') return;
 
-  const enteredOnKeypad = game.dataset.method === 'input';
   clearTrial?.();
   phase = 'animating';
   setInputEnabled(false);
@@ -355,35 +351,22 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     board.classList.add('flash');
     await pause(155);
     if (round !== current) return;
-
-    board.classList.remove('flash');
-    board.classList.add('merged');
-    rainbow.hidden = false;
-    board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
-    burst(effects, board, 12);
-  } else {
-    equation.classList.add('flash');
   }
-  playSound('ten');
-  await pause(280);
-  if (round !== current) return;
-
-  equation.classList.remove('flash');
+  board.classList.remove('flash');
+  board.classList.add('merged');
+  rainbow.hidden = false;
+  board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
+  reward.hidden = false;
   phase = 'complete';
   collected += 1;
   showScore();
   saveComplementCompletion(current, operation, !!randomCandidates);
-  if (enteredOnKeypad) {
-    playSound('success');
-    advanceRound(current);
-    return;
-  }
   supply.hidden = true;
   result.hidden = false;
   next.hidden = false;
-  if (blocks.length) burst(effects, result, 10);
-  playSound('success');
   applyAnswerMethod();
+  burst(effects, board, 12);
+  playSound('ten');
   if (!settings.open) next.focus({ preventScroll: true });
 }
 
