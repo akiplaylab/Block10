@@ -238,21 +238,21 @@ main { position: relative; height: 100%; }
   line-height: 1.13;
   font-variant-numeric: tabular-nums;
 }
-.equation-terms {
+.answer-slot {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: inherit;
+  display: grid;
 }
 .correct-mark {
   position: absolute;
-  inset: -.15em -.24em;
-  width: calc(100% + .48em);
-  height: calc(100% + .3em);
+  top: 50%;
+  left: 50%;
+  width: 1.94em;
+  height: 1.94em;
+  translate: -50% -50%;
   pointer-events: none;
   fill: none;
   stroke: #cc202c;
-  stroke-width: clamp(2px, .065em, 4px);
+  stroke-width: clamp(3px, .1em, 7px);
   stroke-linecap: round;
 }
 .correct-mark[hidden] { display: none; }

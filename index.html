@@ -66,12 +66,14 @@
       </section>
       <section id="game" class="game-screen complement" aria-label="ブロック 10" hidden>
         <div class="equation" aria-live="polite" aria-atomic="true">
-          <div class="equation-terms">
-            <span id="first"></span> <span id="operator"></span> <span id="second"></span> <span data-operator="="></span> <span id="answer">?</span>
-            <svg id="correct-mark" class="correct-mark" viewBox="0 0 320 100" preserveAspectRatio="none" aria-hidden="true" hidden>
-              <path d="M 242,12 C 194,1 92,3 39,19 C 7,29 0,51 17,68 C 36,88 103,97 167,95 C 232,94 302,82 312,57 C 322,30 282,15 230,10" pathLength="1" vector-effect="non-scaling-stroke"/>
+          <span id="first"></span> <span id="operator"></span>
+          <span class="answer-slot">
+            <span id="second"></span>
+            <svg id="correct-mark" class="correct-mark" viewBox="0 0 100 100" aria-hidden="true" hidden>
+              <path d="M 66,9 C 43,-1 16,13 8,35 C -2,60 13,86 38,92 C 62,101 87,86 93,62 C 100,39 85,14 61,7" pathLength="1" vector-effect="non-scaling-stroke"/>
             </svg>
-          </div>
+          </span>
+          <span data-operator="="></span> <span id="answer">?</span>
         </div>
         <div id="board" class="board frame" role="img"></div>
         <div class="feedback">
