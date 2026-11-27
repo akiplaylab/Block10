@@ -147,7 +147,7 @@ function makeKeypad(current: ComplementRound) {
   keypad.className = 'keypad';
   keypad.tabIndex = -1;
   keypad.setAttribute('role', 'group');
-  keypad.setAttribute('aria-label', '数字入力');
+  keypad.setAttribute('aria-label', 'すうじをいれる');
   let value = '';
 
   function resetValue() {
@@ -268,7 +268,7 @@ function showAnswerMethod(current: ComplementRound, focus = false) {
   second.textContent = '?';
   if (showBlocks) describeBoard(current);
   if (answerMethod === 'input') {
-    supply.setAttribute('aria-label', '数字入力');
+    supply.setAttribute('aria-label', 'すうじをいれる');
     const keypad = makeKeypad(current);
     supply.replaceChildren(keypad);
     setInputEnabled(true);
