@@ -34,14 +34,13 @@ const sound = element<HTMLButtonElement>('sound');
 const next = element<HTMLButtonElement>('next');
 const supply = element('supply');
 const score = element('score');
-const result = element('result');
+const correctMark = document.getElementById('correct-mark')!;
 const feedback = element('feedback');
 const overflow = element('overflow');
 const first = element('first');
 const second = element('second');
 const effects = element('effects');
 const board = element('board');
-const equation = game.querySelector<HTMLElement>('.equation')!;
 const questions = new Map<number, ReturnType<typeof createQuestionSource>>();
 const rainbow = document.createElement('div');
 rainbow.className = 'rainbow-block';
@@ -148,6 +147,7 @@ function makeKeypad(current: ComplementRound) {
   keypad.tabIndex = -1;
   keypad.setAttribute('role', 'group');
   keypad.setAttribute('aria-label', 'すうじをいれる');
+  const keys = new Map<string, HTMLButtonElement>();
   let value = '';
 
   function resetValue() {
@@ -165,8 +165,8 @@ function makeKeypad(current: ComplementRound) {
       return;
     }
     const quantity = Number(value);
-    if (classification === 'incorrect') resetValue();
-    void choose(current, quantity, keypad);
+    resetValue();
+    void choose(current, quantity, keypad, [], keys.get(digit));
   }
 
   for (const digit of '1234567890') {
@@ -175,6 +175,7 @@ function makeKeypad(current: ComplementRound) {
     key.className = 'utility';
     key.textContent = digit;
     key.addEventListener('click', () => addDigit(digit));
+    keys.set(digit, key);
     keypad.append(key);
   }
 
@@ -231,7 +232,7 @@ function begin(total: number) {
   score.hidden = false;
   showScore();
   next.hidden = true;
-  result.hidden = true;
+  correctMark.setAttribute('hidden', '');
   supply.hidden = false;
   const terms = equationFor(current, operation);
   first.textContent = String(terms.first);
@@ -241,7 +242,6 @@ function begin(total: number) {
   element('answer').textContent = String(terms.result);
   game.style.setProperty('--rows', String(Math.ceil(total / blocksPerRow)));
   board.dataset.total = String(total);
-  equation.classList.remove('flash');
   rainbow.textContent = String(terms.result);
   showAnswerMethod(current, true);
 }
@@ -350,6 +350,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
 
   second.textContent = String(quantity);
   second.classList.add('solved');
+  correctMark.removeAttribute('hidden');
   if (blocks.length) {
     playSound('place');
     board.classList.add('flash');
@@ -361,14 +362,11 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     rainbow.hidden = false;
     board.setAttribute('aria-label', `にじの ${rainbow.textContent} が 1こ`);
     burst(effects, board, 12);
-  } else {
-    equation.classList.add('flash');
   }
   playSound('ten');
-  await pause(280);
+  await pause(blocks.length ? 230 : 280);
   if (round !== current) return;
 
-  equation.classList.remove('flash');
   phase = 'complete';
   collected += 1;
   showScore();
@@ -379,9 +377,7 @@ async function choose(current: ComplementRound, quantity: number, control: HTMLE
     return;
   }
   supply.hidden = true;
-  result.hidden = false;
   next.hidden = false;
-  if (blocks.length) burst(effects, result, 10);
   playSound('success');
   applyAnswerMethod();
   if (!settings.open) next.focus({ preventScroll: true });

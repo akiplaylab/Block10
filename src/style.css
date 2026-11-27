@@ -238,6 +238,35 @@ main { position: relative; height: 100%; }
   line-height: 1.13;
   font-variant-numeric: tabular-nums;
 }
+.equation-terms {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: inherit;
+}
+.correct-mark {
+  position: absolute;
+  inset: -.15em -.24em;
+  width: calc(100% + .48em);
+  height: calc(100% + .3em);
+  pointer-events: none;
+  fill: none;
+  stroke: #cc202c;
+  stroke-width: clamp(2px, .065em, 4px);
+  stroke-linecap: round;
+}
+.correct-mark[hidden] { display: none; }
+.correct-mark path {
+  stroke-dasharray: 1;
+  animation: draw-correct-mark 220ms ease-out both;
+}
+@keyframes draw-correct-mark {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .correct-mark path { animation: none; }
+}
 #first { color: #1263c7; }
 #second { color: #b45105; }
 #answer { min-width: 1.28em; text-align: center; color: #b63b76; background: #ffe8f3; border-radius: .29em; }
@@ -340,13 +369,6 @@ main { position: relative; height: 100%; }
 .supply button.used { visibility: hidden; }
 .actions { display: flex; align-items: center; justify-content: center; }
 .actions:has(#next[hidden]) { display: none; }
-.result {
-  color: #b82b71;
-  font-size: min(9vw, 7.4vh, 54px);
-  text-shadow: 0 2px 0 white, 0 0 9px white;
-  animation: pop 360ms ease-out both;
-}
-.result span { color: #f5a51a; font-size: .75em; }
 
 .flyer {
   --flight-duration: 210ms;
@@ -975,7 +997,6 @@ body:has(.settings-dialog[open]) { touch-action: pan-y; }
 }
 .keypad button:last-child { grid-column: 2; }
 .keypad.shake { animation: shake 280ms ease-in-out; }
-.equation.flash { animation: flash 155ms ease-in-out both; }
 .complement[data-method="blocks"] #second { min-width: max(1em, 2ch); }
 .complement:is([data-method="choices"], [data-method="input"]) #second { min-width: 2ch; }
 .number-flyer {

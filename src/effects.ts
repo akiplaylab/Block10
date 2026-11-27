@@ -52,6 +52,7 @@ export async function flyNumber(effects: HTMLElement, source: HTMLElement, desti
   const from = source.getBoundingClientRect();
   const to = destination.getBoundingClientRect();
   const destinationStyle = getComputedStyle(destination);
+  const startScale = parseFloat(getComputedStyle(source).fontSize) / parseFloat(destinationStyle.fontSize);
   const flyer = document.createElement('span');
   flyer.className = 'number-flyer';
   flyer.textContent = value;
@@ -67,8 +68,8 @@ export async function flyNumber(effects: HTMLElement, source: HTMLElement, desti
   const dx = from.x + from.width / 2 - (to.x + to.width / 2);
   const dy = from.y + from.height / 2 - (to.y + to.height / 2);
   const motion = flyer.animate([
-    { transform: `translate(${dx}px, ${dy}px) translate(-50%, -50%)` },
-    { transform: 'translate(-50%, -50%)' },
+    { transform: `translate(${dx}px, ${dy}px) translate(-50%, -50%) scale(${startScale})` },
+    { transform: 'translate(-50%, -50%) scale(1)' },
   ], { duration: 250, easing: 'cubic-bezier(.24,.78,.24,1)', fill: 'both' });
   source.classList.add('number-in-flight');
   try {
