@@ -37,7 +37,7 @@
 ## アプリ名と OGP 画像
 
 - 正式なアプリ名はすべての言語で Block10 とします。アプリ内タイトル、ブラウザーのタイトル、OGP タイトル、PWA Manifest の名称と短縮名、iOS のホーム画面追加用の名称、README のタイトルに使用します。
-- SNS メタデータとREADME は、共通の OGP 画像（`public/ogp.png`）を参照します。画像内には Block10、Play、数式を表示します。
+- SNS メタデータと README は、共通の OGP 画像（`public/ogp.png`）を参照します。画像内には Block10、Play、数式を表示します。
 
 ## オフラインと更新
 
