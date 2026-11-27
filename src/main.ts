@@ -71,17 +71,16 @@ function showScore() {
 function showOperation() {
   operations.forEach(option => { option.checked = option.value === operation; });
   document.body.dataset.operation = operation;
-  const preview = equationFor({ total: 8, known: 3 }, operation);
-  settings.querySelectorAll('[data-preview-first]').forEach(term => { term.textContent = String(preview.first); });
-  settings.querySelectorAll('[data-preview-operator]').forEach(term => { term.textContent = preview.symbol; });
-  settings.querySelectorAll('[data-preview-result]').forEach(term => { term.textContent = String(preview.result); });
+  const known = 7;
+  const missing = mainTotal - known;
+  const { first, symbol, result } = equationFor({ total: mainTotal, known }, operation);
+  settings.querySelectorAll('[data-preview-first]').forEach(term => { term.textContent = String(first); });
+  settings.querySelectorAll('[data-preview-operator]').forEach(term => { term.textContent = symbol; });
+  settings.querySelectorAll('[data-preview-result]').forEach(term => { term.textContent = String(result); });
   settings.querySelectorAll('.preview-tiles .slot').forEach(tile => {
     tile.classList.toggle('block', operation === 'subtraction');
     tile.classList.toggle('orange', operation === 'subtraction');
   });
-  const known = 7;
-  const missing = mainTotal - known;
-  const { first, symbol, result } = equationFor({ total: mainTotal, known }, operation);
   element('preview-first').textContent = String(first);
   renderOperator(element('preview-operator'), symbol);
   element('preview-result').textContent = String(result);
